@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="asm-commons">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/DesignPattern/src/proxy/dynamicCglib/asm-commons.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

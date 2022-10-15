@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+    <bean id="studentOne" class="com.pltf.pojo.Student">
+        <property name="name" value="Paul"></property>
+        <property name="age" value="27"></property>
+        <property name="higth" value="178"></property>
+        <property name="id" value="2019"></property>
+
+    </bean>
+
+    <bean id="studentTwo" class="com.pltf.pojo.Student">
+        <constructor-arg value="xiaoF"></constructor-arg>
+        <constructor-arg value="26"></constructor-arg>
+        <constructor-arg value="178"></constructor-arg>
+        <constructor-arg value="2019"></constructor-arg>
+
+    </bean>
+
+    <bean id="studentThree" class="com.pltf.pojo.Student">
+        <property name="id" value="003"></property>
+        <property name="name" value="xiaoxin"></property>
+        <property name="age" value="18"></property>
+        <property name="higth" value="160"></property>
+        <property name="clazz">
+            <bean id="clazzInner" class="com.pltf.pojo.Clazz">
+                <property name="cid" value="001"></property>
+                <property name="cinfo" value="地表最强班"></property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="studentFour" class="com.pltf.pojo.Student">
+        <property name="id" value="003"></property>
+        <property name="name" value="xiaoxin"></property>
+        <property name="age" value="18"></property>
+        <property name="higth" value="160"></property>
+        <property name="hobby">
+            <array>
+                <value>smoking</value>
+                <value>drinking</value>
+                <value>烫头</value>
+            </array>
+        </property>
+        <property name="clazz">
+            <bean id="clazzInner" class="com.pltf.pojo.Clazz">
+                <property name="cid" value="001"></property>
+                <property name="cinfo" value="地表最强班"></property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean name="clazzOne" class="com.pltf.pojo.Clazz">
+        <property name="cid" value="111"></property>
+        <property name="cinfo" value="永远黄金班"></property>
+        <property name="students">
+            <list>
+                <ref bean="studentOne"></ref>
+                <ref bean="studentTwo"></ref>
+                <ref bean="studentThree"></ref>
+                <ref bean="studentFour"></ref>
+            </list>
+        </property>
+    </bean>
+    <bean name="clazzThree" class="com.pltf.pojo.Clazz">
+        <property name="cid" value="111"></property>
+        <property name="cinfo" value="永远黄金班"></property>
+        <property name="students" ref="studentList"></property>
+    </bean>
+    <util:list id="studentList">
+        <ref bean="studentOne"></ref>
+        <ref bean="studentTwo"></ref>
+        <ref bean="studentThree"></ref>
+        <ref bean="studentFour"></ref>
+    </util:list>
+    <bean name="clazzTwo" class="com.pltf.pojo.Clazz">
+        <property name="cid" value="001"></property>
+        <property name="cinfo" value="地表最强班"></property>
+    </bean>
+</beans>
