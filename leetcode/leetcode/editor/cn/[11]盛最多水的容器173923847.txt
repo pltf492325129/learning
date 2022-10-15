@@ -1,0 +1,18 @@
+class Solution {
+    public int maxArea(int[] height) {
+//        1、暴力法 找出left bar, right bar, (x-y)*height_diff
+        int max = 0;
+        for (int i = 0; i < height.length; i++) {
+            for (int j = i+1; j < height.length; j++) {
+                int height_low = Math.max(height[i], height[j])
+                max = Math.max(max, height_low*(j-i));
+            }
+        }
+        return max;
+    }
+}
+
+//total_correct:0
+//compile_error:Line 7: error: ';' expected
+                int height_low = Math.max(height[i], height[j])
+                                                               ^
