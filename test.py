@@ -18,8 +18,6 @@ EGLSurface surface = EGL_NO_SURFACE;
 EGLContext context;
 
 // 左右眼离屏渲染 FBO (1920x874)
-const int PARALLAX_WIDTH = 1920;
-const int PARALLAX_HEIGHT = 874;
 GLuint leftEyeFBO = 0, rightEyeFBO = 0;
 GLuint leftEyeTex = 0, rightEyeTex = 0;
 const char* PARALLAX_SAVE_PATH_FMT = "/data/storage/el2/base/haps/parallaxResults/parallax_%05d_%s.bmp";
@@ -50,7 +48,7 @@ void initParallaxFBOs() {
     glGenFramebuffers(1, &leftEyeFBO);
     glGenTextures(1, &leftEyeTex);
     glBindTexture(GL_TEXTURE_2D, leftEyeTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, PARALLAX_WIDTH, PARALLAX_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -67,7 +65,7 @@ void initParallaxFBOs() {
     glGenFramebuffers(1, &rightEyeFBO);
     glGenTextures(1, &rightEyeTex);
     glBindTexture(GL_TEXTURE_2D, rightEyeTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, PARALLAX_WIDTH, PARALLAX_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -752,7 +750,7 @@ void saveParallaxImageBMP(const char* filePath, int width, int height, const uin
     header[20] = (width >> 16) & 0xFF;
     header[21] = (width >> 24) & 0xFF;
     // 高度（负值表示自上而下）
-    int16_t negHeight = -height;
+    int32_t negHeight = -height;
     header[22] = negHeight & 0xFF;
     header[23] = (negHeight >> 8) & 0xFF;
     header[24] = 0;
@@ -794,7 +792,7 @@ void saveParallaxImageBMP(const char* filePath, int width, int height, const uin
 // 渲染并保存左右眼视差图
 void renderAndSaveParallaxImages(int frameID) {
     Timer t("renderAndSaveParallax", frameID);
-    LOGW("xr renderAndSaveParallax start: frameID=%{public}d, size=%dx%{public}d", frameID, PARALLAX_WIDTH, PARALLAX_HEIGHT);
+    LOGW("xr renderAndSaveParallax start: frameID=%{public}d, size=%dx%{public}d", frameID, WIDTH, HEIGHT);
     
     glUseProgram(program);
     
@@ -813,7 +811,7 @@ void renderAndSaveParallaxImages(int frameID) {
     
     float angle = 50.0;
     float radian = angle * (PI / 180.0);
-    float focalLength = PARALLAX_WIDTH / (2.0f * std::tan(radian/2.0f));
+    float focalLength = WIDTH / (2.0f * std::tan(radian/2.0f));
     float IPD = 0.064f;
     float AI = focalLength * (IPD / 2.0f);
 
@@ -821,12 +819,12 @@ void renderAndSaveParallaxImages(int frameID) {
     glUniform1f(loc_FocusPlane, FocusPlane);
     glUniform1f(loc_NearPlane, NearPlane);
     glUniform1f(loc_FarPlane, FarPlane);
-    glUniform2f(loc_Resolution, PARALLAX_WIDTH, PARALLAX_HEIGHT);
+    glUniform2f(loc_Resolution, WIDTH, HEIGHT);
     glBindVertexArray(vao);
     
     // 渲染左眼到左眼 FBO
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, leftEyeFBO);
-    glViewport(0, 0, PARALLAX_WIDTH, PARALLAX_HEIGHT);
+    glViewport(0, 0, WIDTH, HEIGHT);
     glClear(GL_COLOR_BUFFER_BIT);
     glUniform1i(loc_PatternType, 0);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -834,22 +832,22 @@ void renderAndSaveParallaxImages(int frameID) {
     getErrInfo("leftEye draw");
     
     // 读取左眼图像并保存
-    std::vector<uint8_t> leftPixels(PARALLAX_WIDTH * PARALLAX_HEIGHT * 3);
+    std::vector<uint8_t> leftPixels(WIDTH * HEIGHT * 3);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, leftEyeFBO);
-    glReadPixels(0, 0, PARALLAX_WIDTH, PARALLAX_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, leftPixels.data());
+    glReadPixels(0, 0, WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, leftPixels.data());
     getErrInfo("leftEye readPixels");
     LOGW("Left eye: first[0]=%{public}d,[1]=%{public}d,[2]=%{public}d, size=%{public}u, expected=%{public}d", 
-         leftPixels[0], leftPixels[1], leftPixels[2], leftPixels.size(), PARALLAX_WIDTH * PARALLAX_HEIGHT * 3);
+         leftPixels[0], leftPixels[1], leftPixels[2], leftPixels.size(), WIDTH * HEIGHT * 3);
     
     char leftPath[256];
     snprintf(leftPath, sizeof(leftPath), PARALLAX_SAVE_PATH_FMT, frameID, "left");
     std::thread([=]() {
-        saveParallaxImageBMP(leftPath, PARALLAX_WIDTH, PARALLAX_HEIGHT, leftPixels.data());
+        saveParallaxImageBMP(leftPath, WIDTH, HEIGHT, leftPixels.data());
     }).detach();
     
     // 渲染右眼到右眼 FBO
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightEyeFBO);
-    glViewport(0, 0, PARALLAX_WIDTH, PARALLAX_HEIGHT);
+    glViewport(0, 0, WIDTH, HEIGHT);
     glClear(GL_COLOR_BUFFER_BIT);
     glUniform1i(loc_PatternType, 1);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -857,17 +855,17 @@ void renderAndSaveParallaxImages(int frameID) {
     getErrInfo("rightEye draw");
     
     // 读取右眼图像并保存
-    std::vector<uint8_t> rightPixels(PARALLAX_WIDTH * PARALLAX_HEIGHT * 3);
+    std::vector<uint8_t> rightPixels(WIDTH * HEIGHT * 3);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, rightEyeFBO);
-    glReadPixels(0, 0, PARALLAX_WIDTH, PARALLAX_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, rightPixels.data());
+    glReadPixels(0, 0, WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, rightPixels.data());
     getErrInfo("rightEye readPixels");
     LOGW("Right eye: first[0]=%d,[1]=%d,[2]=%d, size=%{public}zu, expected=%d", 
-         rightPixels[0], rightPixels[1], rightPixels[2], rightPixels.size(), PARALLAX_WIDTH * PARALLAX_HEIGHT * 3);
+         rightPixels[0], rightPixels[1], rightPixels[2], rightPixels.size(), WIDTH * HEIGHT * 3);
     
     char rightPath[256];
     snprintf(rightPath, sizeof(rightPath), PARALLAX_SAVE_PATH_FMT, frameID, "right");
     std::thread([=]() {
-        saveParallaxImageBMP(rightPath, PARALLAX_WIDTH, PARALLAX_HEIGHT, rightPixels.data());
+        saveParallaxImageBMP(rightPath, WIDTH, HEIGHT, rightPixels.data());
     }).detach();
     
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -877,63 +875,9 @@ void renderAndSaveParallaxImages(int frameID) {
 
 int xrmain() {
     initEgl();
-//    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-//    glClearDepthf(1.0f);
-//
-//    glEnable(GL_DEPTH_TEST);
-//    // 创建深度缓冲区（32位浮点，支持glReadPixels读取）
-//    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);        
-//
-//    GLuint fbo = createFBO();
-//    if (fbo == 0) {
-//        LOGE("Failed to create FBO!");
-//    }
     while (1) {
         Timer t0("xrmain loop", g_frameID);
-// ========== 渲染一帧 ==========     
-// 渲染到 FBO
-//        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        glEnable(GL_DEPTH_TEST);
-//        
-//        getErrInfo("xrmain0");
-//        debugFBO("Before read");
-//                  render();
-//        debugFBO("After render");
-//
 
-//        getErrInfo("xrmain1");
-//        queryFBOAttachments(fbo);
-//        check_depth_info();
-//        
-//
-//        if (frameID >= 0 && frameID <= 10) {
-//            LOGW("zpp Saved frame id:%{public}d/", frameID);
-//                // 读取颜色和深度（直接从主FBO读取）
-//                std::vector<unsigned char> colorData;
-//                std::vector<float> depthData;
-//
-//                readColorData(WIDTH, HEIGHT, colorData);
-//                readDepthData(WIDTH, HEIGHT, depthData);
-//
-//                // 保存到后台线程
-//                 std::thread([=]() {
-//                    saveColorMap("/data/storage/el2/base/haps/color1_" + std::to_string(frameID) + ".ppm", colorData, WIDTH, HEIGHT);
-//                    saveDepthMapRaw("/data/storage/el2/base/haps/depth1_" + std::to_string(frameID) + ".bin", depthData, WIDTH, HEIGHT);
-//                    LOGW("Saved frame %{public}d/", frameID);
-//                 }).detach();
-//
-//        }          
-//         // ========== 切换到默认FBO进行显示 ==========
-//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//         将自己FBO的内容绘制到屏幕上
-//        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-//        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//        glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-//        
-//        g_frameID = 1;
         updateTextures(g_frameID);
         render();
         renderAndSaveParallaxImages(g_frameID);  // 渲染并保存左右眼视差图
