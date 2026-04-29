@@ -1,3 +1,166 @@
+#include <thread>
+#include <unistd.h>
+#include <vector>
+#include <sys/stat.h>
+#include <GLES3/gl3.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <cmath>
+#include <native_window/external_window.h>
+#include "common/logger.h"
+#include "load_texture.hpp"
+#include "tools.hpp"
+#include "save_parallax_png.hpp"
+
+#define USE_NATIVE_WINDOW true;
+OHNativeWindow *g_native_window;
+EGLDisplay display;
+EGLSurface surface = EGL_NO_SURFACE;
+EGLContext context;
+
+// 左右眼离屏渲染 FBO (1920x874)
+GLuint leftEyeFBO = 0, rightEyeFBO = 0;
+GLuint leftEyeTex = 0, rightEyeTex = 0;
+const char* PARALLAX_SAVE_PATH_FMT = "/data/storage/el2/base/haps/parallaxResults/parallax_%05d_%s.png";
+
+int debugValue = 0;
+int TOTAL_FRAMES = 1;
+//int TOTAL_FRAMES = 10;
+int g_frameID_start, g_frameID = 624;
+const char* COLOR_PATH_FMT = "/data/storage/el2/base/haps/inputs/results/color_%d.ppm";
+const char* DEPTH_PATH_FMT = "/data/storage/el2/base/haps/inputs/results/depth_%d.bin";
+//const char* COLOR_PATH_FMT = "/data/storage/el2/base/haps/color_%d.ppm";
+//const char* DEPTH_PATH_FMT = "/data/storage/el2/base/haps/depth_%d.bin";
+
+const double PI = 3.14159265358979323846;
+GLuint program = 0;
+GLuint vao = 0, vbo = 0;
+GLuint colorTex = 0, depthTex = 0;
+
+GLint loc_ColorTex, loc_DepthTex;
+GLint loc_AI, loc_DLR, loc_Resolution, loc_PatternType, loc_FocusPlane;
+GLint loc_DebugMode;
+GLint loc_NearPlane, loc_FarPlane;
+
+void initParallaxFBOs() {
+    LOGW("xr initParallaxFBOs START for dump parallax png1920*874");
+    
+    // 创建左眼 FBO
+    glGenFramebuffers(1, &leftEyeFBO);
+    glGenTextures(1, &leftEyeTex);
+    glBindTexture(GL_TEXTURE_2D, leftEyeTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, leftEyeFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, leftEyeTex, 0);
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOGW("leftEyeFBO incomplete: 0x%x", status);
+    }
+    
+    // 创建右眼 FBO
+    glGenFramebuffers(1, &rightEyeFBO);
+    glGenTextures(1, &rightEyeTex);
+    glBindTexture(GL_TEXTURE_2D, rightEyeTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, rightEyeFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rightEyeTex, 0);
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOGW("rightEyeFBO incomplete: 0x%x", status);
+    }
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    getErrInfo("initParallaxFBOs");
+    LOGW("xr initParallaxFBOs END: leftFBO=%{public}d rightFBO=%{public}d", leftEyeFBO, rightEyeFBO);
+}
+
+void initTextures() {
+    LOGW("xr zpp initTextures start");
+    glGenTextures(1, &colorTex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    getErrInfo("createTextures");
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &depthTex);
+    glBindTexture(GL_TEXTURE_2D, depthTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, WIDTH, HEIGHT, 0, GL_RED, GL_FLOAT, nullptr);
+    getErrInfo("initTextures");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    getErrInfo("depthTex init");
+
+    LOGW("xr zpp initTextures END colorTex:%{public}d depthTex:%{public}d", colorTex, depthTex);
+    
+    // 初始化左右眼离屏渲染 FBO
+    initParallaxFBOs();
+}
+
+void updateTextures(int frameID){
+    Timer t("updateTextures", g_frameID);
+    char colorPath[256], depthPath[256];
+    snprintf(colorPath, sizeof(colorPath), COLOR_PATH_FMT, frameID);
+    snprintf(depthPath, sizeof(depthPath), DEPTH_PATH_FMT, frameID);
+
+    LOGW("Loading frame %{public}d: color=%{public}s, depth=%{public}s", frameID, colorPath, depthPath);
+    
+    auto colorImg = loadPPM(colorPath);
+    auto depthImg = loadDepthD24S8(depthPath, WIDTH, HEIGHT);
+    
+    // === 调试：打印深度值 ===
+    LOGW("=== Depth Debug ===");
+    LOGW("depthImg.depth.size() = %{public}zu, expected = %{public}d", depthImg.depth.size(), WIDTH * HEIGHT);
+    for (int i = 0; i < 10; i++) {
+        LOGW("depth[%{public}d] = %{public}f", i, depthImg.depth[i]);
+    }
+    // === 调试结束 ===
+    
+     // Update color texture
+    LOGW("xr updateTextures colorTex:%{public}d depthTex:%{public}d", colorTex, depthTex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, colorImg.data.data());
+    getErrInfo("updateTextures0");   
+    // Update depth texture (使用GL_RED格式，与GL_R32F匹配)
+    glBindTexture(GL_TEXTURE_2D, depthTex);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIDTH, HEIGHT, GL_RED, GL_FLOAT, depthImg.depth.data());
+    getErrInfo("updateTextures depthTex");   
+    
+}
+
+GLuint compileShader(GLenum type, const char *source) {
+    LOGW("xr zpp compileShader start");
+    GLuint shader = glCreateShader(type);
+    glShaderSource(shader, 1, &source, nullptr);
+    glCompileShader(shader);
+
+    GLint success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+    if (!success) {
+        GLchar infoLog[512];
+        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+        LOGE("Shader compile error: %{public}s", infoLog);
+        getErrInfo("compileShader");
+    }
+    return shader;
+}
+
 void initShaders() {
     LOGW("xr zpp initShaders start");
     const char *vertexShaderSource = R"(#version 300 es
@@ -28,23 +191,19 @@ void main() {
     // depthNorm: 0 = 最远, 最大值 = 最近
     float ndcToLinearZ(float d) {
         // 防止除零：d 不应为 1.0（无穷远）
-        return (NearPlane * FarPlane) /
-               (NearPlane + d * (FarPlane - NearPlane));
+        return (NearPlane * FarPlane) / (NearPlane + d * (FarPlane - NearPlane));
     }    
     float reversedZToLinear(float d) {
         // 防止除零（天空区域 d 极小）
         if (d < 0.001) return FarPlane;  // 视为无限远
         return NearPlane / d;            // Reversed-Z infinite far
     }    
-//    float LinearEyeDepth(float z) {
-//        float zparam = (1 - FarPlane/NearPlane) / FarPlane;
-//        float wparam = (FarPlane/NearPlane) / FarPlane;
-//        return 1.0 / ( zbuffer * zparam + wparam);
-//    }
-    float LinearEyeDepth(float d) {
-//        return (FarPlane*NearPlane) / (d * (FarPlane - NearPlane) + NearPlane);
-        return 1.0 / (d * 3.99983 + 0.000167);
+    float LinearEyeDepth(float z) {
+        float zparam = (1 - FarPlane/NearPlane) / FarPlane;
+        float wparam = (FarPlane/NearPlane) / FarPlane;
+        return 1.0 / ( z * zparam + wparam);
     }
+
     
     // --- 核心：DIBR 视差位移与空洞修复函数 ---
     // 返回值：修复空洞后的源纹理 UV 坐标
@@ -52,9 +211,7 @@ void main() {
         // 左眼通常作为基准帧，不位移（或者位移量为 -disparity/2，取决于你的相机模型）
         float eyeSign = isRightEye ? 1.0 : -1.0;
     
-        float invZ_focus = 1.0 / reversedZToLinear(FocusPlane);
-//        float invZ_focus = 1.0 / FocusPlane;
-//        float max_disp_uv = (MAX_PIXEL_DISPARITY * 2.0) / Resolution.x;
+        float invZ_focus = 1.0 / LinearEyeDepth(FocusPlane);
         float max_disp_uv = MAX_PIXEL_DISPARITY / Resolution.x;
     
         vec2 best_src_uv = target_uv;
@@ -207,8 +364,8 @@ vec2 steepParallaxDIBR(vec2 target_uv, bool isRightEye, float MAX_PIXEL_DISPARIT
         }
     
         // 将归一化深度转换为真实距离
-        float Z = reversedZToLinear(depthNorm);
-        float Z_focus = reversedZToLinear(FocusPlane);
+        float Z = LinearEyeDepth(depthNorm);
+        float Z_focus = LinearEyeDepth(FocusPlane);
     
         // 正确的视差公式: disparity = IPD/2 * f * (1/Z - 1/Z_focus) * Scale
         // AI = f * IPD/2，所以 disparity_px = AI * (1/Z - 1/Z_focus)
@@ -217,7 +374,7 @@ vec2 steepParallaxDIBR(vec2 target_uv, bool isRightEye, float MAX_PIXEL_DISPARIT
         float disparity_px = AI * (invZ - invZ_focus);
 
         // 限制最大视差 (像素)
-        const float MAX_PIXEL_DISPARITY = 30.0;
+        const float MAX_PIXEL_DISPARITY = 25.0;
         disparity_px = clamp(disparity_px, -MAX_PIXEL_DISPARITY, MAX_PIXEL_DISPARITY);
     
         // 转为 UV 偏移
@@ -247,7 +404,6 @@ vec2 steepParallaxDIBR(vec2 target_uv, bool isRightEye, float MAX_PIXEL_DISPARIT
 
 // 调试：显示转换后的距离值6=========================================
     if (DebugMode == 6) {
-//        float Z_norm = (Z - NearPlane) / (FarPlane - NearPlane);
         float Z_norm = LinearEyeDepth(depthNorm);
         out_color = vec4(vec3(Z_norm), 1.0);
         return;
@@ -363,9 +519,9 @@ void render() {
     const float NearPlane = 0.25f;   // 近裁剪面 Unity 出入的 _ProjectionParams 参数    
     const float FarPlane = 6000.0f;  // 远裁剪面 300m
 //    const float FocusPlane = 0.503f;  // 聚焦平面 (归一化深度值，对应约 50m)
-    const float FocusPlane = 0.9375f;  
-    
-//Projection = (1.00, 0.25, 6000.00, 0.00017)
+    float Z_target = 4.0f;
+    const float FocusPlane = NearPlane / Z_target;
+    //Projection = (1.00, 0.25, 6000.00, 0.00017)
     
     // 计算焦距和 AI (f * IPD/2)
     float angle = 50.0;   //FOV=50度
@@ -375,17 +531,12 @@ void render() {
     float AI = focalLength * (IPD / 2.0f);  // f * IPD/2
 
     // 计算聚焦平面对应的真实距离用于日志
-    float Z_focus = (1.0f - FocusPlane) * FarPlane + FocusPlane * NearPlane;
-    
-    float Z_target = 4.0f;  // 
-//    float FocusPlane = FarPlane * (Z_target - NearPlane / (Z_target * (FarPlane - NearPlane)));  // ≈ 0.9757
-//    LOGW("xr Z_to_dist: FocusPlane2=%{public}f", FocusPlane2);
-//    float Z_focus = FarPlane * (Z_target - NearPlane / (Z_target * (FarPlane - NearPlane)));  // ≈ 0.9757
-    float reverzed_z0 = NearPlane/FocusPlane;
+    float Z_focus = (1.0f - FocusPlane) * FarPlane + FocusPlane * NearPlane;  // 标准 z 而不是 reverse-z
+    float Z_focus_actual = NearPlane / FocusPlane;
     
     LOGW("xr Focus: focalLength=%{public}f, IPD=%{public}f, AI=%{public}f", focalLength, IPD, AI);
-    LOGW("xr Z_to_dist: NearPlane=%{public}f, FarPlane=%{public}f, FocusPlane_norm=%{public}f -> Z=%{public}f rev_z0=%{public}f ",
-         NearPlane, FarPlane, FocusPlane, Z_focus, reverzed_z0);
+    LOGW("xr Z_to_dist: NearPlane=%{public}f, FarPlane=%{public}f, FocusPlane_norm=%{public}f -> Z=%{public}f z_focus=%{public}f ",
+         NearPlane, FarPlane, FocusPlane, Z_focus, Z_focus_actual);
 
     glUniform1f(loc_AI, AI);
     glUniform2f(loc_DLR, 0.0f, 0.02f);
