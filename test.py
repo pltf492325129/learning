@@ -1,46 +1,27 @@
-#include <thread>
-#include <unistd.h>
-#include <vector>
-#include <sys/stat.h>
-#include <GLES3/gl3.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-#include <cmath>
-#include <native_window/external_window.h>
-#include "common/logger.h"
-#include "load_texture.hpp"
-#include "tools.hpp"
-#include "save_parallax_png.hpp"
+// depthNorm: 0 = 最远, 最大值 = 最近
+//Projection = (1.00, 0.25, 6000.00, 0.00017)
 
-#define USE_NATIVE_WINDOW true;
-OHNativeWindow *g_native_window;
-EGLDisplay display;
-EGLSurface surface = EGL_NO_SURFACE;
-EGLContext context;
+// 深度到距离转换参数
+//    const float NearPlane = 0.1f;   // 近裁剪面 0.1m    
+const float NearPlane = 0.25f;   // 近裁剪面 Unity 出入的 _ProjectionParams 参数    
+const float FarPlane = 6000.0f;  // 远裁剪面 300m
+//    const float FocusPlane = 0.503f;  // 聚焦平面 (归一化深度值，对应约 50m)
+float Z_target = 4.0f;
+const float FocusPlane = (NearPlane / Z_target) * (FarPlane - Z_target) / (FarPlane - NearPlane);
+//z_ndc = (FarPlane + NearPlane)/(FarPlane-NearPlane) - 2*FarPlane*NearPlane/((FarPlane-NearPlane)*Z_target)
 
-// 左右眼离屏渲染 FBO (1920x874)
-GLuint leftEyeFBO = 0, rightEyeFBO = 0;
-GLuint leftEyeTex = 0, rightEyeTex = 0;
-const char* PARALLAX_SAVE_PATH_FMT = "/data/storage/el2/base/haps/parallaxResults/parallax_%05d_%s.png";
+// 计算焦距和 AI (f * IPD/2)
+float angle = 50.0;   //水平FOV=50度
+float radian = angle * (PI / 180.0);
+float focalLength = WIDTH / (2.0f * std::tan(radian/2.0f));  // 焦距(像素)
+float IPD = 0.064f;  // 瞳孔间距 64mm
+float AI = focalLength * (IPD / 2.0f);  // f * IPD/2
 
-int debugValue = 0;
-int TOTAL_FRAMES = 1;
-//int TOTAL_FRAMES = 10;
-int g_frameID_start, g_frameID = 624;
-const char* COLOR_PATH_FMT = "/data/storage/el2/base/haps/inputs/results/color_%d.ppm";
-const char* DEPTH_PATH_FMT = "/data/storage/el2/base/haps/inputs/results/depth_%d.bin";
-//const char* COLOR_PATH_FMT = "/data/storage/el2/base/haps/color_%d.ppm";
-//const char* DEPTH_PATH_FMT = "/data/storage/el2/base/haps/depth_%d.bin";
-
-const double PI = 3.14159265358979323846;
-GLuint program = 0;
-GLuint vao = 0, vbo = 0;
-GLuint colorTex = 0, depthTex = 0;
-
-GLint loc_ColorTex, loc_DepthTex;
-GLint loc_AI, loc_DLR, loc_Resolution, loc_PatternType, loc_FocusPlane;
-GLint loc_DebugMode;
-GLint loc_NearPlane, loc_FarPlane;
+// 计算聚焦平面对应的真实距离用于日志
+float Z_focus = (1.0f - FocusPlane) * FarPlane + FocusPlane * NearPlane;  // 标准 z 而不是 reverse-z
+float Z_focus_actual = NearPlane / FocusPlane;
+    
+float _ZBufferParams;
 
 void initParallaxFBOs() {
     LOGW("xr initParallaxFBOs START for dump parallax png1920*874");
@@ -188,21 +169,14 @@ void main() {
     uniform float NearPlane;       // 近裁剪面 (米)
     uniform float FarPlane;        // 远裁剪面 (米)
     // 深度归一化值转真实距离 (米)
-    // depthNorm: 0 = 最远, 最大值 = 最近
-    float ndcToLinearZ(float d) {
-        // 防止除零：d 不应为 1.0（无穷远）
-        return (NearPlane * FarPlane) / (NearPlane + d * (FarPlane - NearPlane));
-    }    
     float reversedZToLinear(float d) {
         // 防止除零（天空区域 d 极小）
         if (d < 0.001) return FarPlane;  // 视为无限远
         return NearPlane / d;            // Reversed-Z infinite far
     }    
     float LinearEyeDepth(float z) {
-        float zparam = (1 - FarPlane/NearPlane) / FarPlane;
-        float wparam = (FarPlane/NearPlane) / FarPlane;
-        return 1.0 / ( z * zparam + wparam);
-    }
+        return (NearPlane * FarPlane) / (z * (FarPlane - NearPlane) + NearPlane);
+}
 
     
     // --- 核心：DIBR 视差位移与空洞修复函数 ---
@@ -514,29 +488,8 @@ void render() {
     glUniform1i(loc_DepthTex, 1);
     glUniform1i(loc_DebugMode, debugValue);  //调试模式
 
-    // 深度到距离转换参数
-//    const float NearPlane = 0.1f;   // 近裁剪面 0.1m    
-    const float NearPlane = 0.25f;   // 近裁剪面 Unity 出入的 _ProjectionParams 参数    
-    const float FarPlane = 6000.0f;  // 远裁剪面 300m
-//    const float FocusPlane = 0.503f;  // 聚焦平面 (归一化深度值，对应约 50m)
-    float Z_target = 4.0f;
-    const float FocusPlane = NearPlane / Z_target;
-    //Projection = (1.00, 0.25, 6000.00, 0.00017)
-    
-    // 计算焦距和 AI (f * IPD/2)
-    float angle = 50.0;   //FOV=50度
-    float radian = angle * (PI / 180.0);
-    float focalLength = WIDTH / (2.0f * std::tan(radian/2.0f));  // 焦距(像素)
-    float IPD = 0.064f;  // 瞳孔间距 64mm
-    float AI = focalLength * (IPD / 2.0f);  // f * IPD/2
-
-    // 计算聚焦平面对应的真实距离用于日志
-    float Z_focus = (1.0f - FocusPlane) * FarPlane + FocusPlane * NearPlane;  // 标准 z 而不是 reverse-z
-    float Z_focus_actual = NearPlane / FocusPlane;
-    
     LOGW("xr Focus: focalLength=%{public}f, IPD=%{public}f, AI=%{public}f", focalLength, IPD, AI);
-    LOGW("xr Z_to_dist: NearPlane=%{public}f, FarPlane=%{public}f, FocusPlane_norm=%{public}f -> Z=%{public}f z_focus=%{public}f ",
-         NearPlane, FarPlane, FocusPlane, Z_focus, Z_focus_actual);
+    LOGW("xr Z_to_dist: NearPlane=%{public}f, FarPlane=%{public}f, FocusPlane_norm=%{public}f -> Z=%{public}f z_focus=%{public}f ",NearPlane, FarPlane, FocusPlane, Z_focus, Z_focus_actual);
 
     glUniform1f(loc_AI, AI);
     glUniform2f(loc_DLR, 0.0f, 0.02f);
