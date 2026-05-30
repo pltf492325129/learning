@@ -492,111 +492,138 @@ void RenderDepthOverlay(int width, int height) {
 
     gDepthAvailableReported = false;
 
-    // --- Diagnostic: try multiple methods to find one that can read depth ---
-    // Method A: GL_DEPTH_COMPONENT + GL_UNSIGNED_INT
-    // Method B: GL_DEPTH_STENCIL + GL_UNSIGNED_INT_24_8 (for packed DEPTH24_STENCIL8)
-    {
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
+    // CRITICAL: On tile-based mobile GPUs (Mali, Adreno, PowerVR), rendering commands
+    // are deferred until a flush. Our code runs in eglSwapBuffers BEFORE the real swap,
+    // so depth values may still be in on-chip tiles and not written to the texture yet.
+    // _glFinish() forces the GPU to complete all pending work.
+    DBG_LOG("Depth overlay: calling _glFinish() to flush tile-based GPU");
+    _glFinish();
 
-        // Clear any pending errors first
-        while (_glGetError() != GL_NO_ERROR) {}
-
-        // Try Method A: GL_DEPTH_COMPONENT + GL_UNSIGNED_INT
-        GLuint testValA = 0xDEADBEEF;
-        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &testValA);
-        GLenum errA = _glGetError();
-        while (_glGetError() != GL_NO_ERROR) {}
-
-        // Try Method B: GL_DEPTH_STENCIL + GL_UNSIGNED_INT_24_8
-        GLuint testValB = 0xDEADBEEF;
-        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, &testValB);
-        GLenum errB = _glGetError();
-        while (_glGetError() != GL_NO_ERROR) {}
-
-        DBG_LOG("DIAG depth read: MethodA(DEPTH_COMPONENT+UINT) val=0x%08X err=0x%x  MethodB(DEPTH_STENCIL+UINT_24_8) val=0x%08X err=0x%x",
-                testValA, errA, testValB, errB);
-
-        GLint depthSize = 0, stencilSize = 0;
-        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-            GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &depthSize);
-        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-            GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &stencilSize);
-        DBG_LOG("DIAG depth read: depth_size=%d bits, stencil_size=%d bits", depthSize, stencilSize);
-        while (_glGetError() != GL_NO_ERROR) {}
-    }
-
-    // --- Read depth via glReadPixels — try multiple format/type combinations ---
     bool depthReadOk = false;
-    {
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
+    float vertices[] = { -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0 };
+    float texCoords[] = { 0, 0,  1, 0,  0, 1,  1, 1 };
+
+    // === Method 1: Shader sampling of depth texture (most GPU-friendly) ===
+    // After _glFinish(), the depth texture should be populated.
+    if (depthAttachmentType == GL_TEXTURE && depthAttachmentId != 0) {
+        DBG_LOG("Depth overlay: trying shader sampling of depth texture id=%d", depthAttachmentId);
+
+        // Override texture parameters to ensure sampling works
+        _glBindTexture(GL_TEXTURE_2D, depthAttachmentId);
+        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         while (_glGetError() != GL_NO_ERROR) {}
 
-        GLuint* depthPixels = new GLuint[width * height];
+        _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
+        _glViewport(0, 0, width, height);
+        {
+            GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+            _glDrawBuffers(1, drawBuffers);
+        }
+        _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        _glClear(GL_COLOR_BUFFER_BIT);
+        _glDisable(GL_DEPTH_TEST);
+        while (_glGetError() != GL_NO_ERROR) {}
 
-        // Attempt 1: GL_DEPTH_COMPONENT + GL_UNSIGNED_INT
-        _glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, depthPixels);
-        GLenum readErr = _glGetError();
-        if (readErr == GL_NO_ERROR) {
-            DBG_LOG("Depth overlay: depth readback OK via DEPTH_COMPONENT+UNSIGNED_INT");
+        _glUseProgram(gDepthToColorProgram);
+        _glActiveTexture(GL_TEXTURE0);
+        _glBindTexture(GL_TEXTURE_2D, depthAttachmentId);
+        GLint depthTexLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
+        _glUniform1i(depthTexLoc, 0);
+        GLint posLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
+        GLint texLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+
+        _glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+        _glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+        _glEnableVertexAttribArray(posLoc);
+        _glEnableVertexAttribArray(texLoc);
+        _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        GLenum drawErr = _glGetError();
+        DBG_LOG("Depth overlay: shader draw err=0x%x, texLoc=%d, posLoc=%d, texLoc=%d",
+                drawErr, depthTexLoc, posLoc, texLoc);
+
+        // Verify output
+        GLubyte pixel[4] = {0, 0, 0, 0};
+        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
+        _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        DBG_LOG("DIAG shader after flush: gDepthBlitFBO center R=%d G=%d B=%d A=%d",
+                pixel[0], pixel[1], pixel[2], pixel[3]);
+
+        if (pixel[0] > 0 || pixel[1] > 0 || pixel[2] > 0) {
             depthReadOk = true;
-        }
-
-        // Attempt 2: GL_DEPTH_STENCIL + GL_UNSIGNED_INT_24_8
-        if (!depthReadOk) {
-            while (_glGetError() != GL_NO_ERROR) {}
-            _glReadPixels(0, 0, width, height, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, depthPixels);
-            readErr = _glGetError();
-            if (readErr == GL_NO_ERROR) {
-                DBG_LOG("Depth overlay: depth readback OK via DEPTH_STENCIL+UNSIGNED_INT_24_8");
-                depthReadOk = true;
-                // For UNSIGNED_INT_24_8: depth is in upper 24 bits, stencil in lower 8 bits
-                // Shift right by 8 to extract depth
-                for (int i = 0; i < width * height; i++) {
-                    depthPixels[i] = depthPixels[i] >> 8;
-                }
-            }
-        }
-
-        if (!depthReadOk) {
-            DBG_LOG("Depth overlay: ALL depth readback methods failed, err=0x%x", readErr);
-            delete[] depthPixels;
-            // Don't return — still show overlay with game content on left side
+            DBG_LOG("Depth overlay: shader sampling SUCCESS after _glFlush!");
         } else {
-            // Log sample values
-            DBG_LOG("Depth overlay: depth readback OK, center=%u corners=(%u,%u,%u,%u)",
-                    depthPixels[width/2 + (height/2)*width],
-                    depthPixels[0],
-                    depthPixels[width-1],
-                    depthPixels[(height-1)*width],
-                    depthPixels[width-1 + (height-1)*width]);
-
-            // Convert GLuint depth to grayscale RGBA8
-            unsigned char* colorPixels = new unsigned char[width * height * 4];
-            GLuint depthMax = 0x00FFFFFF; // 24-bit depth max
-            for (int i = 0; i < width * height; i++) {
-                float normalized = (float)depthPixels[i] / (float)depthMax;
-                if (normalized > 1.0f) normalized = 1.0f;
-                unsigned char v = static_cast<unsigned char>(normalized * 255.0f);
-                colorPixels[i * 4 + 0] = v;
-                colorPixels[i * 4 + 1] = v;
-                colorPixels[i * 4 + 2] = v;
-                colorPixels[i * 4 + 3] = 255;
-            }
-            delete[] depthPixels;
-
-            _glBindTexture(GL_TEXTURE_2D, gDepthBlitColorTex);
-            _glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, colorPixels);
-            GLenum uploadErr = _glGetError();
-            if (uploadErr != GL_NO_ERROR) {
-                DBG_LOG("Depth overlay: glTexSubImage2D failed, error=0x%x", uploadErr);
-                depthReadOk = false;
-            } else {
-                DBG_LOG("Depth overlay: depth converted to color texture successfully");
-            }
-            delete[] colorPixels;
+            DBG_LOG("Depth overlay: shader sampling still returns 0 after _glFinish");
         }
         while (_glGetError() != GL_NO_ERROR) {}
     }
+
+    // === Method 2: glBlitFramebuffer (works on some devices where shader sampling doesn't) ===
+    if (!depthReadOk && EnsureTempDepthResources(width, height)) {
+        DBG_LOG("Depth overlay: trying glBlitFramebuffer depth blit");
+        while (_glGetError() != GL_NO_ERROR) {}
+
+        _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
+        _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gTempDepthFBO);
+        _glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        GLenum blitErr = _glGetError();
+        DBG_LOG("Depth overlay: depth blit err=0x%x", blitErr);
+
+        // Read one depth pixel from temp FBO to verify
+        GLuint blitDepthVal = 0xDEADBEEF;
+        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
+        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &blitDepthVal);
+        GLenum readErr = _glGetError();
+        DBG_LOG("DIAG blit: gTempDepthFBO depth=0x%08X err=0x%x", blitDepthVal, readErr);
+
+        if (blitErr == GL_NO_ERROR && blitDepthVal != 0xDEADBEEF && blitDepthVal != 0) {
+            // Blit worked! Now use shader to convert depth texture to color
+            _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
+            _glViewport(0, 0, width, height);
+            {
+                GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+                _glDrawBuffers(1, drawBuffers);
+            }
+            _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            _glClear(GL_COLOR_BUFFER_BIT);
+            _glDisable(GL_DEPTH_TEST);
+            while (_glGetError() != GL_NO_ERROR) {}
+
+            _glUseProgram(gDepthToColorProgram);
+            _glActiveTexture(GL_TEXTURE0);
+            _glBindTexture(GL_TEXTURE_2D, gTempDepthTex);
+            GLint dLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
+            _glUniform1i(dLoc, 0);
+            GLint pLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
+            GLint tLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+            _glVertexAttribPointer(pLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+            _glVertexAttribPointer(tLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+            _glEnableVertexAttribArray(pLoc);
+            _glEnableVertexAttribArray(tLoc);
+            _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            GLubyte bpixel[4] = {0, 0, 0, 0};
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
+            _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, bpixel);
+            DBG_LOG("DIAG blit+shader: gDepthBlitFBO center R=%d G=%d B=%d A=%d",
+                    bpixel[0], bpixel[1], bpixel[2], bpixel[3]);
+            if (bpixel[0] > 0 || bpixel[1] > 0 || bpixel[2] > 0) {
+                depthReadOk = true;
+                DBG_LOG("Depth overlay: blit+shader SUCCESS!");
+            }
+        }
+        while (_glGetError() != GL_NO_ERROR) {}
+    }
+
+    if (!depthReadOk) {
+        DBG_LOG("Depth overlay: all depth methods failed, showing game only");
+    }
+
+    while (_glGetError() != GL_NO_ERROR) {}
 
     // --- Overlay assembly ---
     _glBindFramebuffer(GL_FRAMEBUFFER, gOverlayFBO);
