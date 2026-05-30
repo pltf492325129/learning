@@ -370,3 +370,67 @@ void GLES_CALLCONVENTION patrace_glDrawElements(GLenum mode, GLsizei count, GLen
     // traceFunctionBody_after
     after_glDraw();
 }
+
+
+void GLES_CALLCONVENTION patrace_glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter){
+    if (mask & GL_DEPTH_BUFFER_BIT) {
+        GLint readFBO = 0;
+        _glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBO);
+        gLastDepthBlitTargetFBO = (GLuint)readFBO;
+        DBG_LOG("Depth overlay: g_frame_id:%d detected depth blit from FBO=%d, mask=0x%x filter=%x",g_frame_id, readFBO, mask, filter);
+    }
+    
+    unsigned char tid = GetThreadId();
+    UpdateTimesEGLConfigUsed(tid);
+    // traceFunctionBody_pre
+    // traceFunctionBody
+    if (gTraceThread[tid].mCallDepth)
+    {
+        //DBG_LOG("WARNING: Recursive glCall. Depth: %d\n", gTraceThread[tid].mCallDepth);
+        // invokeFunction
+        // DBG_LOG("Invoking: _glBlitFramebuffer(%x, %x, %x, %x, %x, %x, %x, %x, %x, %x)\n", srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+
+        ++gTraceThread[tid].mCallDepth;
+        _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+        --gTraceThread[tid].mCallDepth;
+
+        return;
+    }
+    // invokeFunction
+    DUMP_PER_API("Invoking: _glBlitFramebuffer(%x, %x, %x, %x, %x, %x, %x, %x, %x, %x)\n", srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+
+    ++gTraceThread[tid].mCallDepth;
+    _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    --gTraceThread[tid].mCallDepth;
+
+    // save parameters
+    gTraceOut->callMutex.lock();
+    char* dest = gTraceOut->writebuf;
+    BCall *pCall = (BCall*)dest;
+    pCall->funcId = glBlitFramebuffer_id;
+#ifdef DEBUG
+    if (pCall->funcId > common::ApiInfo::MaxSigId)
+    {
+        DBG_LOG("Fatal error: Trying to write bad func ID for glBlitFramebuffer!\n");
+        abort();
+    }
+#endif
+    pCall->tid = tid; pCall->reserved = 0;
+    dest += sizeof(*pCall);
+
+    dest = WriteFixed<int>(dest, srcX0); // literal
+    dest = WriteFixed<int>(dest, srcY0); // literal
+    dest = WriteFixed<int>(dest, srcX1); // literal
+    dest = WriteFixed<int>(dest, srcY1); // literal
+    dest = WriteFixed<int>(dest, dstX0); // literal
+    dest = WriteFixed<int>(dest, dstY0); // literal
+    dest = WriteFixed<int>(dest, dstX1); // literal
+    dest = WriteFixed<int>(dest, dstY1); // literal
+    dest = WriteFixed<unsigned int>(dest, mask); // literal
+    dest = WriteFixed<int>(dest, filter); // enum
+    pCall->errNo = GetCallErrorNo("glBlitFramebuffer", tid);
+    SendBufForNormalApi(pCall, dest, &gTraceOut->curparambuf, sizeof(*pCall));
+    gTraceOut->callNo++;
+    gTraceOut->callMutex.unlock();
+    // traceFunctionBody_after
+}
