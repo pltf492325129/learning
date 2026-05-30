@@ -1,3 +1,25 @@
+#ifndef _DEPTH_OVERLAY_HPP_
+#define _DEPTH_OVERLAY_HPP_
+
+#include <mutex>
+#include <atomic>
+#include <chrono>
+#include <GLES2/gl2.h>
+
+#define DEPTH_OVERLAY_TRIGGER_FILE "/data/storage/el2/base/haps/inputs/results/depth_overlay"
+#define DEPTH_OVERLAY_STABLE_FRAME_THRESHOLD 30
+
+extern bool gDepthOverlayEnabled;
+extern std::mutex gOverlayMutex;
+extern GLuint gLastDepthBlitTargetFBO;
+
+void InitDepthOverlay(int width, int height);
+void UpdateDepthOverlay(int width, int height);
+void RenderDepthOverlay(int width, int height);
+void CleanupDepthOverlay();
+
+#endif
+
 #include "depth_overlay.hpp"
 #include "../common/os.hpp"
 #include <GLES2/gl2.h>
