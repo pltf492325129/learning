@@ -1,71 +1,42 @@
-	行 24556: 05-30 11:55:00.764 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=121 G=74 B=64  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 24713: 05-30 11:55:00.793 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth=-1.000000, glReadPixels err=0x500
-	行 24714: 05-30 11:55:00.793 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24726: 05-30 11:55:00.810 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 24728: 05-30 11:55:00.812 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=139 G=82 B=73 A=255, err=0x0
-	行 24731: 05-30 11:55:00.813 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=139 G=82 B=73  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 24877: 05-30 11:55:00.836 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth=-1.000000, glReadPixels err=0x500
-	行 24878: 05-30 11:55:00.836 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24889: 05-30 11:55:00.853 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 24892: 05-30 11:55:00.854 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=162 G=102 B=84 A=255, err=0x0
-	行 24895: 05-30 11:55:00.855 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=162 G=102 B=84  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 25046: 05-30 11:55:00.882 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth=-1.000000, glReadPixels err=0x500
-	行 25047: 05-30 11:55:00.882 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25053: 05-30 11:55:00.895 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 25055: 05-30 11:55:00.896 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=159 G=97 B=80 A=255, err=0x0
-	行 25058: 05-30 11:55:00.897 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=159 G=97 B=80  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 25231: 05-30 11:55:00.927 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth=-1.000000, glReadPixels err=0x500
-	行 25232: 05-30 11:55:00.927 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25258: 05-30 11:55:00.944 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 25260: 05-30 11:55:00.945 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=161 G=99 B=81 A=255, err=0x0
-	行 25264: 05-30 11:55:00.946 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=161 G=99 B=81  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 25413: 05-30 11:55:00.970 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth=-1.000000, glReadPixels err=0x500
-	行 25414: 05-30 11:55:00.970 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25425: 05-30 11:55:00.987 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 25427: 05-30 11:55:00.988 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=152 G=91 B=76 A=255, err=0x0
-	行 25430: 05-30 11:55:00.989 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=152 G=91 B=76  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 25586: 05-30 11:55:01.022 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth=-1.000000, glReadPixels err=0x500
-	行 25587: 05-30 11:55:01.022 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25601: 05-30 11:55:01.033 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 25608: 05-30 11:55:01.034 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=141 G=82 B=69 A=255, err=0x0
-	行 25611: 05-30 11:55:01.035 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=141 G=82 B=69  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 25759: 05-30 11:55:01.069 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth=-1.000000, glReadPixels err=0x500
-	行 25760: 05-30 11:55:01.069 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25774: 05-30 11:55:01.081 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 25776: 05-30 11:55:01.082 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=151 G=90 B=76 A=255, err=0x0
-	行 25779: 05-30 11:55:01.084 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=151 G=90 B=76  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 25931: 05-30 11:55:01.121 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth=-1.000000, glReadPixels err=0x500
-	行 25932: 05-30 11:55:01.121 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25941: 05-30 11:55:01.128 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 25943: 05-30 11:55:01.129 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=143 G=84 B=71 A=255, err=0x0
-	行 25946: 05-30 11:55:01.131 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=143 G=84 B=71  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 26112: 05-30 11:55:01.166 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth=-1.000000, glReadPixels err=0x500
-	行 26113: 05-30 11:55:01.166 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26127: 05-30 11:55:01.178 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 26129: 05-30 11:55:01.180 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=145 G=84 B=71 A=255, err=0x0
-	行 26132: 05-30 11:55:01.181 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=145 G=84 B=71  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 26284: 05-30 11:55:01.214 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth=-1.000000, glReadPixels err=0x500
-	行 26285: 05-30 11:55:01.214 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26294: 05-30 11:55:01.222 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 26297: 05-30 11:55:01.224 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=140 G=80 B=68 A=255, err=0x0
-	行 26300: 05-30 11:55:01.225 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=140 G=80 B=68  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 26471: 05-30 11:55:01.250 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth=-1.000000, glReadPixels err=0x500
-	行 26472: 05-30 11:55:01.250 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26477: 05-30 11:55:01.265 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 26480: 05-30 11:55:01.266 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=121 G=64 B=58 A=255, err=0x0
-	行 26483: 05-30 11:55:01.267 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=121 G=64 B=58  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 26632: 05-30 11:55:01.293 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth=-1.000000, glReadPixels err=0x500
-	行 26633: 05-30 11:55:01.293 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26644: 05-30 11:55:01.308 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 26646: 05-30 11:55:01.309 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=126 G=68 B=61 A=255, err=0x0
-	行 26649: 05-30 11:55:01.310 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=126 G=68 B=61  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 26796: 05-30 11:55:01.337 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth=-1.000000, glReadPixels err=0x500
-	行 26797: 05-30 11:55:01.337 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26810: 05-30 11:55:01.353 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 26812: 05-30 11:55:01.353 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=125 G=67 B=61 A=255, err=0x0
-	行 26815: 05-30 11:55:01.355 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=125 G=67 B=61  right(1439,414) R=0 G=0 B=0  err=0x0
-	行 26974: 05-30 11:55:01.379 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth=-1.000000, glReadPixels err=0x500
-	行 26975: 05-30 11:55:01.379 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,509: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26992: 05-30 11:55:01.395 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,638: [DEBUG] DIAG shader output: gDepthBlitFBO center R=0 G=0 B=0 A=255, err=0x0
-	行 26995: 05-30 11:55:01.396 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] DIAG game content: currentFBO=0 center R=125 G=67 B=60 A=255, err=0x0
-	行 26998: 05-30 11:55:01.397 48881 50559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,695: [DEBUG] DIAG overlay: left(479,414) R=125 G=67 B=60  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 23740: 05-30 13:59:13.274 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 23741: 05-30 13:59:13.274 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 23900: 05-30 13:59:13.344 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 23901: 05-30 13:59:13.344 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 24054: 05-30 13:59:13.412 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 24055: 05-30 13:59:13.412 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 24210: 05-30 13:59:13.480 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 24211: 05-30 13:59:13.480 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 24371: 05-30 13:59:13.544 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 24372: 05-30 13:59:13.544 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 24534: 05-30 13:59:13.617 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 24535: 05-30 13:59:13.617 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 24689: 05-30 13:59:13.685 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 24690: 05-30 13:59:13.685 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 24845: 05-30 13:59:13.769 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 24846: 05-30 13:59:13.769 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 24995: 05-30 13:59:13.835 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 24996: 05-30 13:59:13.835 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 25147: 05-30 13:59:13.906 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 25148: 05-30 13:59:13.906 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 25309: 05-30 13:59:13.976 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 25310: 05-30 13:59:13.976 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 25468: 05-30 13:59:14.043 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 25469: 05-30 13:59:14.043 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 25629: 05-30 13:59:14.112 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 25630: 05-30 13:59:14.112 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 25786: 05-30 13:59:14.180 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 25787: 05-30 13:59:14.180 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 25936: 05-30 13:59:14.246 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 25937: 05-30 13:59:14.246 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 26087: 05-30 13:59:14.310 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 26088: 05-30 13:59:14.310 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 26244: 05-30 13:59:14.381 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 26245: 05-30 13:59:14.381 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 26396: 05-30 13:59:14.448 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 26397: 05-30 13:59:14.448 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 26598: 05-30 13:59:14.521 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 26599: 05-30 13:59:14.521 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 26758: 05-30 13:59:14.602 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 26759: 05-30 13:59:14.602 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+	行 26918: 05-30 13:59:14.667 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
+	行 26919: 05-30 13:59:14.667 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
