@@ -501,9 +501,14 @@ void RenderDepthOverlay(int width, int height) {
 
     // === 深度数据存在性诊断 ===
     // 用 GPU 硬件深度测试（非纹理采样）来确认 blit 后的深度数据是否存在。
-    // 原理：blit depth 到临时 FBO，清除 color 为 RED，绘制 Z=0.5 的黑色 quad。
-    // 深度测试 GL_LESS: quad Z(0.5) < stored depth → PASS → 写黑色；否则保持红色。
-    // 如果看到混合色 → 深度数据存在；全红或全黑 → 数据可能为空。
+    // 原理：blit depth 到临时 FBO，清除 color 为 RED，启用深度测试，
+    // 在不同 Z 值绘制黑色 quad，观察深度测试是否 PASS/FAIL。
+    //
+    // 注意 NDC Z → depth buffer 值的映射：depth = (Z + 1) / 2
+    //   Z = -1.0 → depth = 0.0 (近平面)
+    //   Z =  0.0 → depth = 0.5
+    //   Z =  1.0 → depth = 1.0 (远平面)
+    // GL_LESS: quad_depth < stored_depth → PASS → 写黑色；否则保持红色。
     {
         if (EnsureTempDepthResources(width, height)) {
             // Step 1: Blit depth to temp FBO
@@ -515,50 +520,63 @@ void RenderDepthOverlay(int width, int height) {
             GLenum diagBlitErr = _glGetError();
             DBG_LOG("DIAG depth-test: depth blit err=0x%x", diagBlitErr);
 
-            // Step 2: Depth test diagnostic
+            // Step 2: Test at 4 depth thresholds
             _glBindFramebuffer(GL_FRAMEBUFFER, gTempDepthFBO);
             _glViewport(0, 0, width, height);
             {
                 GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
                 _glDrawBuffers(1, drawBuffers);
             }
-            _glClearColor(1.0f, 0.0f, 0.0f, 1.0f);  // RED
-            _glClear(GL_COLOR_BUFFER_BIT);  // 只清 color，不清 depth！
-
-            _glEnable(GL_DEPTH_TEST);
-            _glDepthFunc(GL_LESS);
-
-            // 绘制全屏 quad at Z=0.5，shader 输出黑色（绑定空纹理→texture2D返回0）
-            float diagVerts[] = { -1,-1,0.5f, 1,-1,0.5f, -1,1,0.5f, 1,1,0.5f };
             _glUseProgram(gDepthToColorProgram);
             _glActiveTexture(GL_TEXTURE0);
             _glBindTexture(GL_TEXTURE_2D, 0);  // 空纹理 → shader 输出黑色
             _glUniform1i(_glGetUniformLocation(gDepthToColorProgram, "u_depthTexture"), 0);
             GLint diagPosLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
             GLint diagTexLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
-            _glVertexAttribPointer(diagPosLoc, 3, GL_FLOAT, GL_FALSE, 0, diagVerts);
-            _glEnableVertexAttribArray(diagPosLoc);
             if (diagTexLoc >= 0) _glDisableVertexAttribArray(diagTexLoc);
-            _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            _glDisable(GL_DEPTH_TEST);
+            _glEnableVertexAttribArray(diagPosLoc);
 
-            // Step 3: 读回多个像素点判断深度数据
-            GLubyte dpCenter[4] = {0}, dpLeft[4] = {0}, dpRight[4] = {0};
-            _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, dpCenter);
-            _glReadPixels(width/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, dpLeft);
-            _glReadPixels(width*3/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, dpRight);
-            DBG_LOG("DIAG depth-test: center R=%d G=%d B=%d  left R=%d G=%d B=%d  right R=%d G=%d B=%d",
-                    dpCenter[0], dpCenter[1], dpCenter[2],
-                    dpLeft[0], dpLeft[1], dpLeft[2],
-                    dpRight[0], dpRight[1], dpRight[2]);
-            // RED(255,0,0) = depth < 0.5 (近处), BLACK(0,0,0) = depth >= 0.5 (远处)
-            // 如果有混合 → 深度数据存在，根因是 GPU 不支持深度纹理采样
-            // 如果全相同 → 深度数据可能为空/均匀
-            bool diagHasData = (dpCenter[0] != dpLeft[0] || dpCenter[0] != dpRight[0] ||
-                                dpCenter[0] == 255 || dpCenter[0] == 0);
-            DBG_LOG("DIAG depth-test: data_exists=%s (mixed=%s)",
-                    diagHasData ? "LIKELY" : "UNCERTAIN",
-                    (dpCenter[0] != dpLeft[0] || dpCenter[0] != dpRight[0]) ? "YES" : "NO");
+            // 测试 4 个深度阈值：depth=0.0, 0.25, 0.5, 0.75
+            // 对应 NDC Z = -1.0, -0.5, 0.0, 0.5
+            float testZ[] = { -1.0f, -0.5f, 0.0f, 0.5f };
+            float testDepth[] = { 0.0f, 0.25f, 0.5f, 0.75f };
+            GLubyte diagResult[4][4] = {{0}};
+
+            for (int t = 0; t < 4; t++) {
+                // 每次先清除 color 为红色
+                _glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+                _glClear(GL_COLOR_BUFFER_BIT);  // 只清 color，不清 depth！
+
+                // 绘制 quad at Z=testZ[t]
+                float dv[] = { -1,-1,testZ[t], 1,-1,testZ[t], -1,1,testZ[t], 1,1,testZ[t] };
+                _glVertexAttribPointer(diagPosLoc, 3, GL_FLOAT, GL_FALSE, 0, dv);
+                _glEnable(GL_DEPTH_TEST);
+                _glDepthFunc(GL_LESS);
+                _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                _glDisable(GL_DEPTH_TEST);
+
+                // 读回中心像素
+                _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, diagResult[t]);
+            }
+
+            DBG_LOG("DIAG depth-test: threshold depth=0.00(Z=-1.0): R=%d (%s)",
+                    diagResult[0][0], diagResult[0][0] > 0 ? "RED=fail" : "BLACK=pass");
+            DBG_LOG("DIAG depth-test: threshold depth=0.25(Z=-0.5): R=%d (%s)",
+                    diagResult[1][0], diagResult[1][0] > 0 ? "RED=fail" : "BLACK=pass");
+            DBG_LOG("DIAG depth-test: threshold depth=0.50(Z= 0.0): R=%d (%s)",
+                    diagResult[2][0], diagResult[2][0] > 0 ? "RED=fail" : "BLACK=pass");
+            DBG_LOG("DIAG depth-test: threshold depth=0.75(Z= 0.5): R=%d (%s)",
+                    diagResult[3][0], diagResult[3][0] > 0 ? "RED=fail" : "BLACK=pass");
+
+            // 判断结论
+            bool anyPass = (diagResult[0][0] == 0 || diagResult[1][0] == 0 ||
+                            diagResult[2][0] == 0 || diagResult[3][0] == 0);
+            bool allFailAtNear = (diagResult[0][0] > 0);  // depth=0.0 阈值也 fail → depth 全为 0
+            if (anyPass) {
+                DBG_LOG("DIAG depth-test: CONCLUSION=DEPTH_DATA_EXISTS (some tests passed, data is present)");
+            } else if (allFailAtNear) {
+                DBG_LOG("DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)");
+            }
             while (_glGetError() != GL_NO_ERROR) {}
         } else {
             DBG_LOG("DIAG depth-test: EnsureTempDepthResources failed, skipping diagnostic");
