@@ -1,42 +1,317 @@
-	行 23740: 05-30 13:59:13.274 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 23741: 05-30 13:59:13.274 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 23900: 05-30 13:59:13.344 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 23901: 05-30 13:59:13.344 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24054: 05-30 13:59:13.412 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 24055: 05-30 13:59:13.412 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24210: 05-30 13:59:13.480 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 24211: 05-30 13:59:13.480 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24371: 05-30 13:59:13.544 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 24372: 05-30 13:59:13.544 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24534: 05-30 13:59:13.617 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 24535: 05-30 13:59:13.617 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24689: 05-30 13:59:13.685 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 24690: 05-30 13:59:13.685 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24845: 05-30 13:59:13.769 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 24846: 05-30 13:59:13.769 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 24995: 05-30 13:59:13.835 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 24996: 05-30 13:59:13.835 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25147: 05-30 13:59:13.906 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 25148: 05-30 13:59:13.906 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25309: 05-30 13:59:13.976 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 25310: 05-30 13:59:13.976 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25468: 05-30 13:59:14.043 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 25469: 05-30 13:59:14.043 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25629: 05-30 13:59:14.112 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 25630: 05-30 13:59:14.112 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25786: 05-30 13:59:14.180 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 25787: 05-30 13:59:14.180 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 25936: 05-30 13:59:14.246 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 25937: 05-30 13:59:14.246 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26087: 05-30 13:59:14.310 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 26088: 05-30 13:59:14.310 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26244: 05-30 13:59:14.381 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 26245: 05-30 13:59:14.381 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26396: 05-30 13:59:14.448 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 26397: 05-30 13:59:14.448 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26598: 05-30 13:59:14.521 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 26599: 05-30 13:59:14.521 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26758: 05-30 13:59:14.602 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=297 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 26759: 05-30 13:59:14.602 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
-	行 26918: 05-30 13:59:14.667 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,504: [DEBUG] DIAG source depth: sourceFBO=265 center depth_uint=3735928559 depth_float=0.869839, err=0x500
-	行 26919: 05-30 13:59:14.667 37722 38559 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG source depth: depth component size=24 bits
+05-30 14:11:44.083 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1)
+05-30 14:11:44.083 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:491 framebuffer:1 target：8ca9
+05-30 14:11:44.083 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=1 has depth attachment type=0x8d41
+05-30 14:11:44.083 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:491 _glViewport(0, 0, 77f, 33c)
+05-30 14:11:44.083 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:491 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.083 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:491 _glViewport(0, 0, 77f, 33c)
+05-30 14:11:44.083 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 0)
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:491 framebuffer:0 target：8ca9
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41224: [DEBUG] Depth overlay: selected best depth FBO=20 (draws=41, verts=45360)
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,103: [DEBUG] Depth overlay: trigger file check result=1, path=/data/storage/el2/base/haps/inputs/results/depth_overlay
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,405: [DEBUG] Depth overlay: using recorded depth blit target FBO=20
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,428: [DEBUG] Depth overlay: sourceFBO=20, GL_READ_FRAMEBUFFER_BINDING=20, GL_FRAMEBUFFER_BINDING=0
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,441: [DEBUG] Depth overlay: sourceFBO=20 has depth(type=0x1702,id=231) color(type=0x1702,id=235)
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,451: [DEBUG] Depth overlay: sourceFBO depth texture id=231 size=1919x828 redSize=0
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,473: [DEBUG] Depth overlay: render frameID=373, size=1919x828, sourceFBO=20, color=235, depth=(type=0x1702,id=231), currentFBO=0
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,475: [DEBUG] Depth overlay: shader programs - depthToColor=140, sideBySide=137, gDepthBlitFBO=4, gOverlayFBO=3
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1682481): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1682481): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,517: [DEBUG] DIAG depth read: MethodA(DEPTH_COMPONENT+UINT) val=0xDEADBEEF err=0x500  MethodB(DEPTH_STENCIL+UINT_24_8) val=0xDEADBEEF err=0x500
+05-30 14:11:44.084 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,524: [DEBUG] DIAG depth read: depth_size=24 bits, stencil_size=8 bits
+05-30 14:11:44.085 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1682481): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.085 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1682481): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.085 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] Depth overlay: ALL depth readback methods failed, err=0x500
+05-30 14:11:44.085 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,603: [DEBUG] Depth overlay: FBO gOverlayFBO (3) complete
+05-30 14:11:44.085  1642  1642 I C0140D/display_engine_service/DE N HW: D OnEvent<223>: event=0 extra=12
+05-30 14:11:44.088   800 44932 I C02B86/audio_server/AudioEndpointInner: [ZeroVolumeCheck]zero volume, will stop fastSink in 4s.
+05-30 14:11:44.101  1642  1642 I C0140D/display_engine_service/DE N HW: D OnEvent<223>: event=0 extra=12
+05-30 14:11:44.103   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] not slient 6frames change to slient
+05-30 14:11:44.105 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,621: [DEBUG] DIAG game content: currentFBO=0 center R=255 G=255 B=255 A=255, err=0x0
+05-30 14:11:44.105 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,624: [DEBUG] Depth overlay: first blit - read from currentFBO=0 to gOverlayFBO left half
+05-30 14:11:44.105 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] Depth overlay: second blit - read from gDepthBlitFBO=4 to gOverlayFBO right half
+05-30 14:11:44.107 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,654: [DEBUG] DIAG overlay: left(479,414) R=255 G=255 B=255  right(1439,414) R=0 G=0 B=0  err=0x0
+05-30 14:11:44.107 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,657: [DEBUG] Depth overlay: final blit - from gOverlayFBO=3 to savedFBO=0
+05-30 14:11:44.107  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:352-HandleNativeWindowSetBufferGeometry>: cxl HandleNativeWindowSetBufferGeometry requestWidth:2504, requestHeight 1080
+05-30 14:11:44.107  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:219-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer before requestWidth:0, requestHeight 0
+05-30 14:11:44.107  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:226-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer after requestWidth:0, requestHeight 0
+05-30 14:11:44.108  1619  1903 E C02515/render_service/METADATA_SRV: [0;32;31m[EraseMetadataKey:174]  fail[m
+05-30 14:11:44.108  1619  1903 E C01401/render_service/Bufferqueue: <surface_buffer_impl.cpp:732-EraseMetadataKey>: EraseMetadataKey Failed with -1
+05-30 14:11:44.108   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] slient 1frames change to not slient
+05-30 14:11:44.109 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41268: [INFO] Frame start frameID:492
+05-30 14:11:44.109 44110 44837 E C01401/com.miHoYo.Yuanshen/Bufferqueue: <native_window.cpp:219-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer before requestWidth:828, requestHeight 1919
+05-30 14:11:44.110 44110 44837 E C01401/com.miHoYo.Yuanshen/Bufferqueue: <native_window.cpp:226-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer after requestWidth:828, requestHeight 1919
+05-30 14:11:44.110 38249 44629 I C05830/game_accelerate_schedule/CollectionDelegate: CheckRefreshVoteRateFail# check refresh vote rate, VoteRefreshRate=120, timestamp=1780121453094,ScreenCurrentRefreshRate=60.
+05-30 14:11:44.110 38249 44629 I C05830/game_accelerate_schedule/CollectionDelegate: UpdateRefreshVoteFailCount# refreshRate 120, m_refreshvotefailR1 1
+05-30 14:11:44.113 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, a)
+05-30 14:11:44.113 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:10 target：8ca9
+05-30 14:11:44.113 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 80, 80)
+05-30 14:11:44.113   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] not slient 1frames change to slient
+05-30 14:11:44.113 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, b)
+05-30 14:11:44.113 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:11 target：8ca9
+05-30 14:11:44.114 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, e)
+05-30 14:11:44.114 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:14 target：8ca9
+05-30 14:11:44.114 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 100, 100)
+05-30 14:11:44.115 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 101)
+05-30 14:11:44.115 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:257 target：8ca9
+05-30 14:11:44.115 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=257 has depth attachment type=0x1702
+05-30 14:11:44.115 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca8, 101)
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:257 target：8ca8
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 10)
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:16 target：8ca9
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=16 has depth attachment type=0x1702
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,28974: [DEBUG] Depth overlay: g_frame_id:492 detected depth blit from FBO=257, mask=0x100 filter=2600
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca8, 0)
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:0 target：8ca8
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 101)
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:257 target：8ca9
+05-30 14:11:44.118 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=257 has depth attachment type=0x1702
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 11)
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:17 target：8ca9
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=17 has depth attachment type=0x1702
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 3bf, 19e)
+05-30 14:11:44.119  1642  1642 I C0140D/display_engine_service/DE N HW: D OnEvent<223>: event=0 extra=12
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 12)
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:18 target：8ca9
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1683672): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.119 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 200, 200)
+05-30 14:11:44.120 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(200, 0, 200, 200)
+05-30 14:11:44.120 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, c)
+05-30 14:11:44.120 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:12 target：8ca9
+05-30 14:11:44.121 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 200, 200)
+05-30 14:11:44.121 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 13)
+05-30 14:11:44.121 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:19 target：8ca9
+05-30 14:11:44.121 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 3bf, 19e)
+05-30 14:11:44.121 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 14)
+05-30 14:11:44.121 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:20 target：8ca9
+05-30 14:11:44.121 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=20 has depth attachment type=0x1702
+05-30 14:11:44.126 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 16)
+05-30 14:11:44.126 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:22 target：8ca9
+05-30 14:11:44.126 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 98, 4c)
+05-30 14:11:44.126 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 15)
+05-30 14:11:44.126 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:21 target：8ca9
+05-30 14:11:44.127 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 16)
+05-30 14:11:44.127 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:22 target：8ca9
+05-30 14:11:44.127 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 17)
+05-30 14:11:44.127 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:23 target：8ca9
+05-30 14:11:44.127 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=23 has depth attachment type=0x1702
+05-30 14:11:44.127 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.128   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] slient 3frames change to not slient
+05-30 14:11:44.128 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 18)
+05-30 14:11:44.128 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:24 target：8ca9
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=24 has depth attachment type=0x1702
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 102)
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:258 target：8ca9
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 103)
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:259 target：8ca9
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 3bf, 19e)
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 104)
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:260 target：8ca9
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1e)
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:30 target：8ca9
+05-30 14:11:44.129 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 1e0, cf)
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 105)
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:261 target：8ca9
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1e)
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:30 target：8ca9
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 21)
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:33 target：8ca9
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, c6, 9e)
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 20)
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:32 target：8ca9
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 21)
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:33 target：8ca9
+05-30 14:11:44.130 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 22)
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:34 target：8ca9
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 1e0, cf)
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 23)
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:35 target：8ca9
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1)
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:1 target：8ca9
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=1 has depth attachment type=0x8d41
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 77f, 33c)
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.131 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:492 _glViewport(0, 0, 77f, 33c)
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 0)
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:492 framebuffer:0 target：8ca9
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41224: [DEBUG] Depth overlay: selected best depth FBO=18 (draws=12, verts=99054)
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,103: [DEBUG] Depth overlay: trigger file check result=1, path=/data/storage/el2/base/haps/inputs/results/depth_overlay
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,405: [DEBUG] Depth overlay: using recorded depth blit target FBO=18
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,428: [DEBUG] Depth overlay: sourceFBO=18, GL_READ_FRAMEBUFFER_BINDING=18, GL_FRAMEBUFFER_BINDING=0
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,441: [DEBUG] Depth overlay: sourceFBO=18 has depth(type=0x0,id=0) color(type=0x0,id=0)
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,442: [DEBUG] Depth overlay GL ERROR at after query sourceFBO attachments: 0x502
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,344: [DEBUG] Depth overlay: found candidate FBO=1 with color+depth, depthType=0x8d41
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.132 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.133   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] not slient 1frames change to slient
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,357: [DEBUG] Depth overlay: selected FBO=1 as best depth source
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,468: [DEBUG] Depth overlay: switched to FBO=1 for depth, color=1, depth=(type=0x8d41,id=1)
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,473: [DEBUG] Depth overlay: render frameID=374, size=1919x828, sourceFBO=1, color=1, depth=(type=0x8d41,id=1), currentFBO=0
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,475: [DEBUG] Depth overlay: shader programs - depthToColor=140, sideBySide=137, gDepthBlitFBO=4, gOverlayFBO=3
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,517: [DEBUG] DIAG depth read: MethodA(DEPTH_COMPONENT+UINT) val=0xDEADBEEF err=0x500  MethodB(DEPTH_STENCIL+UINT_24_8) val=0xDEADBEEF err=0x500
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,524: [DEBUG] DIAG depth read: depth_size=24 bits, stencil_size=8 bits
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1686353): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] Depth overlay: ALL depth readback methods failed, err=0x500
+05-30 14:11:44.134 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,603: [DEBUG] Depth overlay: FBO gOverlayFBO (3) complete
+05-30 14:11:44.137  1642  1642 I C0140D/display_engine_service/DE N HW: D OnEvent<223>: event=0 extra=12
+05-30 14:11:44.138   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] slient 1frames change to not slient
+05-30 14:11:44.140  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:352-HandleNativeWindowSetBufferGeometry>: cxl HandleNativeWindowSetBufferGeometry requestWidth:2504, requestHeight 1080
+05-30 14:11:44.140  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:219-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer before requestWidth:0, requestHeight 0
+05-30 14:11:44.140  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:226-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer after requestWidth:0, requestHeight 0
+05-30 14:11:44.141  1619  1903 E C02515/render_service/METADATA_SRV: [0;32;31m[EraseMetadataKey:174]  fail[m
+05-30 14:11:44.141  1619  1903 E C01401/render_service/Bufferqueue: <surface_buffer_impl.cpp:732-EraseMetadataKey>: EraseMetadataKey Failed with -1
+05-30 14:11:44.141  1402 20731 I C014A0/composer_host/DE H GmpAdaptor: I HandleLogPrint<62>: [Main] GMP Enable:1 [0]:000|000|000 [16]:31b|2ec|ffe [272]:51f|f86|1b2 [1535]:511|501|4f1 [4624]:f4e|290|01c [4912]:ffe|fca|f97
+05-30 14:11:44.142  2350 20684 I C01560/wifi_manager_service/StaStateMachine: [a92ab1588d2cf33 2f4cac7 25b6c00]SignalPoll,bssid:a2:c0:**:**:**:95,ssid:H15**********_5G,networkId:4,band:2,freq:5745,rssi:-57,noise:-86,chload:196,snr:37,ulDelay:1,txLinkSpeed:5513,rxLinkSpeed:4900,txBytes:164507914,rxBytes:45075334,txFailed:0,txPackets:181046,rxPackets:131132,wifiCategory:2, wifiLinkType:0,GetWifiStandard:6,rxmax:1200,txmax:1200,connState:4,detState:10,lastSignal:4,chloadSelf:0,c0Rssi:-128,c1Rssi:-128
+05-30 14:11:44.142  2350 20684 I C01560/wifi_manager_service/WifiEnhanceInfoRequestor: [a92ab1588d2cf33 2f4cac7 25b6c00]GetSignalExtInfo signalInfo.ext is invalid
+05-30 14:11:44.143   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] not slient 1frames change to slient
+05-30 14:11:44.144  1626  2136 W C01120/foundation/BMS: [a92ab1588d2cf33 2558a88 36ca8ce][bundle_data_mgr.cpp(GetBundleNameAndIndexForUid:4206)]uid: 1010 invalid!
+05-30 14:11:44.144  2350 20684 I C01560/wifi_manager_service/WifiEnhanceInfoRequestor: [a92ab1588d2cf33 2f4cac7 25b6c00]GetSignalExtInfo signalInfo.ext is invalid
+05-30 14:11:44.144  2350 20684 E C01560/wifi_manager_service/WifiCongestionService: [a92ab1588d2cf33 2f4cac7 25b6c00]HandleSignalPollChangedMsg unsupported
+05-30 14:11:44.145  2350  6006 I C01560/wifi_manager_service/Perf5gHandoverService: [a92ab1588d2cf33 2222c65 2f4cac7]Enter ActiveScan, rssi: -57, scanStyle: 0
+05-30 14:11:44.146  1626  2136 W C01120/foundation/BMS: [a92ab1588d2cf33 10638fe 36ca8ce][bundle_data_mgr.cpp(GetBundleNameAndIndexForUid:4206)]uid: 1010 invalid!
+05-30 14:11:44.152 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,621: [DEBUG] DIAG game content: currentFBO=0 center R=255 G=255 B=255 A=255, err=0x0
+05-30 14:11:44.152 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,624: [DEBUG] Depth overlay: first blit - read from currentFBO=0 to gOverlayFBO left half
+05-30 14:11:44.152 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] Depth overlay: second blit - read from gDepthBlitFBO=4 to gOverlayFBO right half
+05-30 14:11:44.153  1642  1642 I C0140D/display_engine_service/DE N HW: D OnEvent<223>: event=0 extra=12
+05-30 14:11:44.153   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] slient 2frames change to not slient
+05-30 14:11:44.154 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,654: [DEBUG] DIAG overlay: left(479,414) R=255 G=255 B=255  right(1439,414) R=0 G=0 B=0  err=0x0
+05-30 14:11:44.154 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,657: [DEBUG] Depth overlay: final blit - from gOverlayFBO=3 to savedFBO=0
+05-30 14:11:44.156 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41268: [INFO] Frame start frameID:493
+05-30 14:11:44.156 44110 44837 E C01401/com.miHoYo.Yuanshen/Bufferqueue: <native_window.cpp:219-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer before requestWidth:828, requestHeight 1919
+05-30 14:11:44.156 44110 44837 E C01401/com.miHoYo.Yuanshen/Bufferqueue: <native_window.cpp:226-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer after requestWidth:828, requestHeight 1919
+05-30 14:11:44.158   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] not slient 1frames change to slient
+05-30 14:11:44.158 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, a)
+05-30 14:11:44.158 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:10 target：8ca9
+05-30 14:11:44.158 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 80, 80)
+05-30 14:11:44.159 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, b)
+05-30 14:11:44.159 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:11 target：8ca9
+05-30 14:11:44.160 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, e)
+05-30 14:11:44.160 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:14 target：8ca9
+05-30 14:11:44.160 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 100, 100)
+05-30 14:11:44.160 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, f)
+05-30 14:11:44.160 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:15 target：8ca9
+05-30 14:11:44.161 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=15 has depth attachment type=0x1702
+05-30 14:11:44.161 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.163   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] slient 1frames change to not slient
+05-30 14:11:44.164 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca8, f)
+05-30 14:11:44.164 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:15 target：8ca8
+05-30 14:11:44.164 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 10)
+05-30 14:11:44.164 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:16 target：8ca9
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=16 has depth attachment type=0x1702
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,28974: [DEBUG] Depth overlay: g_frame_id:493 detected depth blit from FBO=15, mask=0x100 filter=2600
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca8, 0)
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:0 target：8ca8
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, f)
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:15 target：8ca9
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=15 has depth attachment type=0x1702
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 11)
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:17 target：8ca9
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=17 has depth attachment type=0x1702
+05-30 14:11:44.165 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 3bf, 19e)
+05-30 14:11:44.166 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 12)
+05-30 14:11:44.166 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:18 target：8ca9
+05-30 14:11:44.166 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1687354): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.166 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 200, 200)
+05-30 14:11:44.166 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 200, 200, 200)
+05-30 14:11:44.167 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, d)
+05-30 14:11:44.167 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:13 target：8ca9
+05-30 14:11:44.167 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 200, 200)
+05-30 14:11:44.167 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 13)
+05-30 14:11:44.167 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:19 target：8ca9
+05-30 14:11:44.167 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 3bf, 19e)
+05-30 14:11:44.168 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 14)
+05-30 14:11:44.168 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:20 target：8ca9
+05-30 14:11:44.168 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=20 has depth attachment type=0x1702
+05-30 14:11:44.168   800 44932 I C02B86/audio_server/AudioEndpointInner: [ZeroVolumeCheck]zero volume, will stop fastSink in 4s.
+05-30 14:11:44.168   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] not slient 1frames change to slient
+05-30 14:11:44.170  1642  1642 I C0140D/display_engine_service/DE N HW: D OnEvent<223>: event=0 extra=12
+05-30 14:11:44.173 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 15)
+05-30 14:11:44.173 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:21 target：8ca9
+05-30 14:11:44.173   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] slient 1frames change to not slient
+05-30 14:11:44.173 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 98, 4c)
+05-30 14:11:44.173  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:352-HandleNativeWindowSetBufferGeometry>: cxl HandleNativeWindowSetBufferGeometry requestWidth:2504, requestHeight 1080
+05-30 14:11:44.173  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:219-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer before requestWidth:0, requestHeight 0
+05-30 14:11:44.173 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 16)
+05-30 14:11:44.173 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:22 target：8ca9
+05-30 14:11:44.173  1619  1903 E C01401/render_service/Bufferqueue: <native_window.cpp:226-NativeWindowRequestBuffer>: cxl NativeWindowRequestBuffer after requestWidth:0, requestHeight 0
+05-30 14:11:44.174 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 15)
+05-30 14:11:44.174 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:21 target：8ca9
+05-30 14:11:44.174 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 17)
+05-30 14:11:44.174 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:23 target：8ca9
+05-30 14:11:44.174 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=23 has depth attachment type=0x1702
+05-30 14:11:44.174 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.174  1619  1903 E C02515/render_service/METADATA_SRV: [0;32;31m[EraseMetadataKey:174]  fail[m
+05-30 14:11:44.174  1619  1903 E C01401/render_service/Bufferqueue: <surface_buffer_impl.cpp:732-EraseMetadataKey>: EraseMetadataKey Failed with -1
+05-30 14:11:44.176 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 18)
+05-30 14:11:44.176 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:24 target：8ca9
+05-30 14:11:44.176 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=24 has depth attachment type=0x1702
+05-30 14:11:44.176 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1b)
+05-30 14:11:44.176 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:27 target：8ca9
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 103)
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:259 target：8ca9
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 3bf, 19e)
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 104)
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:260 target：8ca9
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1e)
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:30 target：8ca9
+05-30 14:11:44.177 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 1e0, cf)
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1f)
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:31 target：8ca9
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1e)
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:30 target：8ca9
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 20)
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:32 target：8ca9
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, c6, 9e)
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 21)
+05-30 14:11:44.178 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:33 target：8ca9
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 20)
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:32 target：8ca9
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 22)
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:34 target：8ca9
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 1e0, cf)
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 23)
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:35 target：8ca9
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.179 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 1)
+05-30 14:11:44.180 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:1 target：8ca9
+05-30 14:11:44.180 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=1 has depth attachment type=0x8d41
+05-30 14:11:44.180 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 77f, 33c)
+05-30 14:11:44.180 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 77e, 33c)
+05-30 14:11:44.180 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,10403: [DEBUG] Invoking: gframdeID:493 _glViewport(0, 0, 77f, 33c)
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1516: [DEBUG] Invoking: _glBindFramebuffer(8ca9, 0)
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1520: [DEBUG] glBindFramebuffer frameID:493 framebuffer:0 target：8ca9
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41224: [DEBUG] Depth overlay: selected best depth FBO=18 (draws=14, verts=94398)
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,103: [DEBUG] Depth overlay: trigger file check result=1, path=/data/storage/el2/base/haps/inputs/results/depth_overlay
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,405: [DEBUG] Depth overlay: using recorded depth blit target FBO=18
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,428: [DEBUG] Depth overlay: sourceFBO=18, GL_READ_FRAMEBUFFER_BINDING=18, GL_FRAMEBUFFER_BINDING=0
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,441: [DEBUG] Depth overlay: sourceFBO=18 has depth(type=0x0,id=0) color(type=0x0,id=0)
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,442: [DEBUG] Depth overlay GL ERROR at after query sourceFBO attachments: 0x502
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,344: [DEBUG] Depth overlay: found candidate FBO=1 with color+depth, depthType=0x8d41
+05-30 14:11:44.181 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.182 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+05-30 14:11:44.183   800 44932 W C02B82/audio_server/AudioLogUtils: [ProcessVolumeData][AudioEndpoint::Play] not slient 2frames change to slient
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,357: [DEBUG] Depth overlay: selected FBO=1 as best depth source
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,468: [DEBUG] Depth overlay: switched to FBO=1 for depth, color=1, depth=(type=0x8d41,id=1)
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,473: [DEBUG] Depth overlay: render frameID=375, size=1919x828, sourceFBO=1, color=1, depth=(type=0x8d41,id=1), currentFBO=0
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,475: [DEBUG] Depth overlay: shader programs - depthToColor=140, sideBySide=137, gDepthBlitFBO=4, gOverlayFBO=3
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,517: [DEBUG] DIAG depth read: MethodA(DEPTH_COMPONENT+UINT) val=0xDEADBEEF err=0x500  MethodB(DEPTH_STENCIL+UINT_24_8) val=0xDEADBEEF err=0x500
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,524: [DEBUG] DIAG depth read: depth_size=24 bits, stencil_size=8 bits
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=1690062): Error:glProgramUniformMatrix3x4fv::<format> is not an accepted value
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] Depth overlay: ALL depth readback methods failed, err=0x500
+05-30 14:11:44.184 44110 44837 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,603: [DEBUG] Depth overlay: FBO gOverlayFBO (3) complete
+05-30 14:11:44.188  1642  1642 I C0140D/display_engine_service/DE N HW: D OnEvent<223>: event=0 extra=12
