@@ -1,59 +1,217 @@
-	行    31: 05-30 15:25:58.245 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行    32: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行    33: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行    34: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行    35: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行    36: 05-30 15:25:58.252 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行   206: 05-30 15:25:58.333 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行   207: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行   208: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行   209: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行   210: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行   211: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行   382: 05-30 15:25:58.413 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行   384: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行   385: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行   386: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行   387: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行   388: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行   555: 05-30 15:25:58.503 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行   556: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行   557: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行   558: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行   559: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行   560: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行   752: 05-30 15:25:58.585 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行   753: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行   754: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行   755: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行   756: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行   757: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行   923: 05-30 15:25:58.667 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行   924: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行   925: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行   926: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行   927: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行   928: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行  1095: 05-30 15:25:58.750 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  1097: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行  1098: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行  1099: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行  1100: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行  1101: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行  1266: 05-30 15:25:58.842 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  1267: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行  1268: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行  1269: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行  1270: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行  1271: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行  1436: 05-30 15:25:58.940 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  1437: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行  1438: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行  1439: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行  1440: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
-	行  1441: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
-	行  1608: 05-30 15:25:59.019 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  1609: 05-30 15:25:59.025 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
-	行  1610: 05-30 15:25:59.026 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
-	行  1611: 05-30 15:25:59.026 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
-	行  1612: 05-30 15:25:59.026 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行   48: 05-30 15:48:24.141 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行   49: 05-30 15:48:24.144 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行   53: 05-30 15:48:24.146 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行   59: 05-30 15:48:24.148 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行   63: 05-30 15:48:24.149 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=222 G=212 B=198 A=255, err=0x0
+	行   67: 05-30 15:48:24.150 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=222 G=212 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行  230: 05-30 15:48:24.206 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  231: 05-30 15:48:24.209 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  235: 05-30 15:48:24.210 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  240: 05-30 15:48:24.212 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  245: 05-30 15:48:24.213 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行  250: 05-30 15:48:24.215 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行  442: 05-30 15:48:24.272 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  444: 05-30 15:48:24.275 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  447: 05-30 15:48:24.276 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  452: 05-30 15:48:24.277 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  456: 05-30 15:48:24.278 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行  461: 05-30 15:48:24.279 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行  613: 05-30 15:48:24.337 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  615: 05-30 15:48:24.340 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  618: 05-30 15:48:24.341 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  623: 05-30 15:48:24.343 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  629: 05-30 15:48:24.344 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=212 B=198 A=255, err=0x0
+	行  633: 05-30 15:48:24.346 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=212 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行  795: 05-30 15:48:24.402 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  796: 05-30 15:48:24.405 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  800: 05-30 15:48:24.407 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  805: 05-30 15:48:24.409 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  811: 05-30 15:48:24.410 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=212 B=198 A=255, err=0x0
+	行  815: 05-30 15:48:24.412 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=212 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行  979: 05-30 15:48:24.466 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  981: 05-30 15:48:24.469 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  985: 05-30 15:48:24.471 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  990: 05-30 15:48:24.472 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  994: 05-30 15:48:24.473 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行  998: 05-30 15:48:24.474 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 1150: 05-30 15:48:24.531 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 1151: 05-30 15:48:24.534 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 1155: 05-30 15:48:24.535 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1160: 05-30 15:48:24.537 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1164: 05-30 15:48:24.538 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行 1168: 05-30 15:48:24.539 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 1329: 05-30 15:48:24.596 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 1330: 05-30 15:48:24.599 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 1334: 05-30 15:48:24.600 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1339: 05-30 15:48:24.602 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1343: 05-30 15:48:24.603 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行 1350: 05-30 15:48:24.605 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 1572: 05-30 15:48:24.661 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 1574: 05-30 15:48:24.664 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 1577: 05-30 15:48:24.666 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1582: 05-30 15:48:24.668 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1588: 05-30 15:48:24.669 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行 1592: 05-30 15:48:24.671 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 1745: 05-30 15:48:24.727 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 1747: 05-30 15:48:24.730 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 1750: 05-30 15:48:24.731 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1755: 05-30 15:48:24.733 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1761: 05-30 15:48:24.734 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行 1764: 05-30 15:48:24.736 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 1962: 05-30 15:48:24.788 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 1963: 05-30 15:48:24.792 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 1966: 05-30 15:48:24.794 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1972: 05-30 15:48:24.795 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 1976: 05-30 15:48:24.796 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行 1979: 05-30 15:48:24.798 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 2134: 05-30 15:48:24.853 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 2135: 05-30 15:48:24.857 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 2138: 05-30 15:48:24.858 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 2144: 05-30 15:48:24.859 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 2148: 05-30 15:48:24.860 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行 2151: 05-30 15:48:24.861 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 2325: 05-30 15:48:24.912 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 2327: 05-30 15:48:24.916 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 2330: 05-30 15:48:24.918 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 2335: 05-30 15:48:24.919 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 2339: 05-30 15:48:24.920 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行 2342: 05-30 15:48:24.922 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行 2492: 05-30 15:48:24.977 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行 2494: 05-30 15:48:24.980 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行 2498: 05-30 15:48:24.982 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行 2503: 05-30 15:48:24.984 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行   32: 05-30 15:48:24.115 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=1 has depth attachment type=0x8d41
+	行   38: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41224: [DEBUG] Depth overlay: selected best depth FBO=542 (draws=111, verts=561777)
+	行   39: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,103: [DEBUG] Depth overlay: trigger file check result=1, path=/data/storage/el2/base/haps/inputs/results/depth_overlay
+	行   40: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,405: [DEBUG] Depth overlay: using recorded depth blit target FBO=542
+	行   41: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,428: [DEBUG] Depth overlay: sourceFBO=542, GL_READ_FRAMEBUFFER_BINDING=542, GL_FRAMEBUFFER_BINDING=0
+	行   42: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,441: [DEBUG] Depth overlay: sourceFBO=542 has depth(type=0x1702,id=2062) color(type=0x1702,id=4595)
+	行   43: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,451: [DEBUG] Depth overlay: sourceFBO depth texture id=2062 size=1919x828 redSize=0
+	行   44: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,473: [DEBUG] Depth overlay: render frameID=964, size=1919x828, sourceFBO=542, color=4595, depth=(type=0x1702,id=2062), currentFBO=0
+	行   45: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,475: [DEBUG] Depth overlay: shader programs - depthToColor=140, sideBySide=137, gDepthBlitFBO=4, gOverlayFBO=3
+	行   46: 05-30 15:48:24.118 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,499: [DEBUG] Depth overlay: calling _glFinish() to flush tile-based GPU
+	行   48: 05-30 15:48:24.141 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行   49: 05-30 15:48:24.144 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行   50: 05-30 15:48:24.144 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,594: [DEBUG] Depth overlay: trying shader sampling of depth texture id=2062
+	行   51: 05-30 15:48:24.144 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,632: [DEBUG] Depth overlay: shader draw err=0x0, texLoc=0, posLoc=0, texLoc=1
+	行   53: 05-30 15:48:24.146 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行   54: 05-30 15:48:24.146 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,645: [DEBUG] Depth overlay: shader sampling still returns 0 after _glFinish
+	行   55: 05-30 15:48:24.146 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,655: [DEBUG] Depth overlay: trying glBlitFramebuffer depth blit
+	行   56: 05-30 15:48:24.146 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] Depth overlay: depth blit err=0x0
+	行   57: 05-30 15:48:24.146 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,701: [DEBUG] Depth overlay: blit+shader draw err=0x0, dLoc=0, pLoc=0, tLoc=1
+	行   59: 05-30 15:48:24.148 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行   60: 05-30 15:48:24.148 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,714: [DEBUG] Depth overlay: blit succeeded but shader output is still 0
+	行   61: 05-30 15:48:24.148 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,721: [DEBUG] Depth overlay: all depth methods failed, showing game only
+	行   62: 05-30 15:48:24.148 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,728: [DEBUG] Depth overlay: FBO gOverlayFBO (3) complete
+	行   63: 05-30 15:48:24.149 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=222 G=212 B=198 A=255, err=0x0
+	行   64: 05-30 15:48:24.149 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,749: [DEBUG] Depth overlay: first blit - read from currentFBO=0 to gOverlayFBO left half
+	行   65: 05-30 15:48:24.149 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,764: [DEBUG] Depth overlay: second blit - read from gDepthBlitFBO=4 to gOverlayFBO right half
+	行   67: 05-30 15:48:24.150 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=222 G=212 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行   68: 05-30 15:48:24.150 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,782: [DEBUG] Depth overlay: final blit - from gOverlayFBO=3 to savedFBO=0
+	行   86: 05-30 15:48:24.156 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=586 has depth attachment type=0x1702
+	行   94: 05-30 15:48:24.168 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=530 has depth attachment type=0x1702
+	行   95: 05-30 15:48:24.168 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,28974: [DEBUG] Depth overlay: g_frame_id:1083 detected depth blit from FBO=586, mask=0x100 filter=2600
+	行  100: 05-30 15:48:24.168 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=586 has depth attachment type=0x1702
+	行  103: 05-30 15:48:24.168 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=536 has depth attachment type=0x1702
+	行  145: 05-30 15:48:24.171 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=5959936): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+	行  178: 05-30 15:48:24.176 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=554 has depth attachment type=0x1702
+	行  184: 05-30 15:48:24.180 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=521 has depth attachment type=0x1702
+	行  215: 05-30 15:48:24.184 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=1 has depth attachment type=0x8d41
+	行  221: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41224: [DEBUG] Depth overlay: selected best depth FBO=586 (draws=111, verts=561777)
+	行  222: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,103: [DEBUG] Depth overlay: trigger file check result=1, path=/data/storage/el2/base/haps/inputs/results/depth_overlay
+	行  223: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,405: [DEBUG] Depth overlay: using recorded depth blit target FBO=586
+	行  224: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,428: [DEBUG] Depth overlay: sourceFBO=586, GL_READ_FRAMEBUFFER_BINDING=586, GL_FRAMEBUFFER_BINDING=0
+	行  225: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,441: [DEBUG] Depth overlay: sourceFBO=586 has depth(type=0x1702,id=2062) color(type=0x1702,id=4595)
+	行  226: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,451: [DEBUG] Depth overlay: sourceFBO depth texture id=2062 size=1919x828 redSize=0
+	行  227: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,473: [DEBUG] Depth overlay: render frameID=965, size=1919x828, sourceFBO=586, color=4595, depth=(type=0x1702,id=2062), currentFBO=0
+	行  228: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,475: [DEBUG] Depth overlay: shader programs - depthToColor=140, sideBySide=137, gDepthBlitFBO=4, gOverlayFBO=3
+	行  229: 05-30 15:48:24.189 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,499: [DEBUG] Depth overlay: calling _glFinish() to flush tile-based GPU
+	行  230: 05-30 15:48:24.206 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  231: 05-30 15:48:24.209 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  232: 05-30 15:48:24.209 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,594: [DEBUG] Depth overlay: trying shader sampling of depth texture id=2062
+	行  233: 05-30 15:48:24.209 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,632: [DEBUG] Depth overlay: shader draw err=0x0, texLoc=0, posLoc=0, texLoc=1
+	行  235: 05-30 15:48:24.210 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  236: 05-30 15:48:24.210 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,645: [DEBUG] Depth overlay: shader sampling still returns 0 after _glFinish
+	行  237: 05-30 15:48:24.210 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,655: [DEBUG] Depth overlay: trying glBlitFramebuffer depth blit
+	行  238: 05-30 15:48:24.210 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] Depth overlay: depth blit err=0x0
+	行  239: 05-30 15:48:24.210 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,701: [DEBUG] Depth overlay: blit+shader draw err=0x0, dLoc=0, pLoc=0, tLoc=1
+	行  240: 05-30 15:48:24.212 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  241: 05-30 15:48:24.212 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,714: [DEBUG] Depth overlay: blit succeeded but shader output is still 0
+	行  242: 05-30 15:48:24.212 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,721: [DEBUG] Depth overlay: all depth methods failed, showing game only
+	行  243: 05-30 15:48:24.212 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,728: [DEBUG] Depth overlay: FBO gOverlayFBO (3) complete
+	行  245: 05-30 15:48:24.213 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行  246: 05-30 15:48:24.213 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,749: [DEBUG] Depth overlay: first blit - read from currentFBO=0 to gOverlayFBO left half
+	行  247: 05-30 15:48:24.213 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,764: [DEBUG] Depth overlay: second blit - read from gDepthBlitFBO=4 to gOverlayFBO right half
+	行  250: 05-30 15:48:24.215 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行  251: 05-30 15:48:24.215 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,782: [DEBUG] Depth overlay: final blit - from gOverlayFBO=3 to savedFBO=0
+	行  268: 05-30 15:48:24.221 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=542 has depth attachment type=0x1702
+	行  276: 05-30 15:48:24.233 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=530 has depth attachment type=0x1702
+	行  277: 05-30 15:48:24.233 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,28974: [DEBUG] Depth overlay: g_frame_id:1084 detected depth blit from FBO=542, mask=0x100 filter=2600
+	行  282: 05-30 15:48:24.234 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=542 has depth attachment type=0x1702
+	行  285: 05-30 15:48:24.234 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=587 has depth attachment type=0x1702
+	行  328: 05-30 15:48:24.237 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=5968408): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+	行  353: 05-30 15:48:24.243 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=554 has depth attachment type=0x1702
+	行  358: 05-30 15:48:24.246 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=521 has depth attachment type=0x1702
+	行  391: 05-30 15:48:24.251 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=1 has depth attachment type=0x8d41
+	行  402: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41224: [DEBUG] Depth overlay: selected best depth FBO=542 (draws=111, verts=561777)
+	行  403: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,103: [DEBUG] Depth overlay: trigger file check result=1, path=/data/storage/el2/base/haps/inputs/results/depth_overlay
+	行  404: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,405: [DEBUG] Depth overlay: using recorded depth blit target FBO=542
+	行  405: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,428: [DEBUG] Depth overlay: sourceFBO=542, GL_READ_FRAMEBUFFER_BINDING=542, GL_FRAMEBUFFER_BINDING=0
+	行  406: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,441: [DEBUG] Depth overlay: sourceFBO=542 has depth(type=0x1702,id=2062) color(type=0x1702,id=4595)
+	行  407: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,451: [DEBUG] Depth overlay: sourceFBO depth texture id=2062 size=1919x828 redSize=0
+	行  408: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,473: [DEBUG] Depth overlay: render frameID=966, size=1919x828, sourceFBO=542, color=4595, depth=(type=0x1702,id=2062), currentFBO=0
+	行  409: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,475: [DEBUG] Depth overlay: shader programs - depthToColor=140, sideBySide=137, gDepthBlitFBO=4, gOverlayFBO=3
+	行  410: 05-30 15:48:24.255 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,499: [DEBUG] Depth overlay: calling _glFinish() to flush tile-based GPU
+	行  442: 05-30 15:48:24.272 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  444: 05-30 15:48:24.275 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  445: 05-30 15:48:24.275 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,594: [DEBUG] Depth overlay: trying shader sampling of depth texture id=2062
+	行  446: 05-30 15:48:24.275 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,632: [DEBUG] Depth overlay: shader draw err=0x0, texLoc=0, posLoc=0, texLoc=1
+	行  447: 05-30 15:48:24.276 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  448: 05-30 15:48:24.276 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,645: [DEBUG] Depth overlay: shader sampling still returns 0 after _glFinish
+	行  449: 05-30 15:48:24.276 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,655: [DEBUG] Depth overlay: trying glBlitFramebuffer depth blit
+	行  450: 05-30 15:48:24.276 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] Depth overlay: depth blit err=0x0
+	行  451: 05-30 15:48:24.276 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,701: [DEBUG] Depth overlay: blit+shader draw err=0x0, dLoc=0, pLoc=0, tLoc=1
+	行  452: 05-30 15:48:24.277 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  453: 05-30 15:48:24.277 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,714: [DEBUG] Depth overlay: blit succeeded but shader output is still 0
+	行  454: 05-30 15:48:24.277 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,721: [DEBUG] Depth overlay: all depth methods failed, showing game only
+	行  455: 05-30 15:48:24.277 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,728: [DEBUG] Depth overlay: FBO gOverlayFBO (3) complete
+	行  456: 05-30 15:48:24.278 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=213 B=198 A=255, err=0x0
+	行  457: 05-30 15:48:24.278 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,749: [DEBUG] Depth overlay: first blit - read from currentFBO=0 to gOverlayFBO left half
+	行  459: 05-30 15:48:24.278 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,764: [DEBUG] Depth overlay: second blit - read from gDepthBlitFBO=4 to gOverlayFBO right half
+	行  461: 05-30 15:48:24.279 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=213 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
+	行  462: 05-30 15:48:24.279 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,782: [DEBUG] Depth overlay: final blit - from gOverlayFBO=3 to savedFBO=0
+	行  480: 05-30 15:48:24.286 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=586 has depth attachment type=0x1702
+	行  487: 05-30 15:48:24.298 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=530 has depth attachment type=0x1702
+	行  488: 05-30 15:48:24.298 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,28974: [DEBUG] Depth overlay: g_frame_id:1085 detected depth blit from FBO=586, mask=0x100 filter=2600
+	行  493: 05-30 15:48:24.298 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=586 has depth attachment type=0x1702
+	行  496: 05-30 15:48:24.299 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=536 has depth attachment type=0x1702
+	行  538: 05-30 15:48:24.302 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: egltrace.cpp,200: [DEBUG] API::ERROR::HIGH (call=5976973): Error:glGetClipPlanexOES::<target> is GL_DEPTH_STENCIL_ATTACHMENT but the same object is not bound to DEPTH and STENCIL attachments
+	行  561: 05-30 15:48:24.307 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=554 has depth attachment type=0x1702
+	行  567: 05-30 15:48:24.310 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=521 has depth attachment type=0x1702
+	行  597: 05-30 15:48:24.314 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,1538: [DEBUG] Depth overlay: FBO=1 has depth attachment type=0x8d41
+	行  604: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: tcp_egltrace_auto.cpp,41224: [DEBUG] Depth overlay: selected best depth FBO=586 (draws=111, verts=561777)
+	行  605: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,103: [DEBUG] Depth overlay: trigger file check result=1, path=/data/storage/el2/base/haps/inputs/results/depth_overlay
+	行  606: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,405: [DEBUG] Depth overlay: using recorded depth blit target FBO=586
+	行  607: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,428: [DEBUG] Depth overlay: sourceFBO=586, GL_READ_FRAMEBUFFER_BINDING=586, GL_FRAMEBUFFER_BINDING=0
+	行  608: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,441: [DEBUG] Depth overlay: sourceFBO=586 has depth(type=0x1702,id=2062) color(type=0x1702,id=4595)
+	行  609: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,451: [DEBUG] Depth overlay: sourceFBO depth texture id=2062 size=1919x828 redSize=0
+	行  610: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,473: [DEBUG] Depth overlay: render frameID=967, size=1919x828, sourceFBO=586, color=4595, depth=(type=0x1702,id=2062), currentFBO=0
+	行  611: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,475: [DEBUG] Depth overlay: shader programs - depthToColor=140, sideBySide=137, gDepthBlitFBO=4, gOverlayFBO=3
+	行  612: 05-30 15:48:24.318 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,499: [DEBUG] Depth overlay: calling _glFinish() to flush tile-based GPU
+	行  613: 05-30 15:48:24.337 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,507: [DEBUG] DIAG scan: scanning FBOs for non-empty depth buffer...
+	行  615: 05-30 15:48:24.340 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,582: [DEBUG] DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512
+	行  616: 05-30 15:48:24.340 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,594: [DEBUG] Depth overlay: trying shader sampling of depth texture id=2062
+	行  617: 05-30 15:48:24.340 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,632: [DEBUG] Depth overlay: shader draw err=0x0, texLoc=0, posLoc=0, texLoc=1
+	行  618: 05-30 15:48:24.341 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,639: [DEBUG] DIAG shader after flush: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  619: 05-30 15:48:24.341 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,645: [DEBUG] Depth overlay: shader sampling still returns 0 after _glFinish
+	行  620: 05-30 15:48:24.341 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,655: [DEBUG] Depth overlay: trying glBlitFramebuffer depth blit
+	行  621: 05-30 15:48:24.341 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,662: [DEBUG] Depth overlay: depth blit err=0x0
+	行  622: 05-30 15:48:24.342 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,701: [DEBUG] Depth overlay: blit+shader draw err=0x0, dLoc=0, pLoc=0, tLoc=1
+	行  623: 05-30 15:48:24.343 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,708: [DEBUG] DIAG blit+shader: gDepthBlitFBO center R=0 G=0 B=0 A=255
+	行  624: 05-30 15:48:24.343 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,714: [DEBUG] Depth overlay: blit succeeded but shader output is still 0
+	行  625: 05-30 15:48:24.343 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,721: [DEBUG] Depth overlay: all depth methods failed, showing game only
+	行  626: 05-30 15:48:24.343 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,728: [DEBUG] Depth overlay: FBO gOverlayFBO (3) complete
+	行  629: 05-30 15:48:24.344 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,746: [DEBUG] DIAG game content: currentFBO=0 center R=223 G=212 B=198 A=255, err=0x0
+	行  630: 05-30 15:48:24.344 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,749: [DEBUG] Depth overlay: first blit - read from currentFBO=0 to gOverlayFBO left half
+	行  631: 05-30 15:48:24.344 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,764: [DEBUG] Depth overlay: second blit - read from gDepthBlitFBO=4 to gOverlayFBO right half
+	行  633: 05-30 15:48:24.346 23718 24784 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,779: [DEBUG] DIAG overlay: left(479,414) R=223 G=212 B=198  right(1439,414) R=0 G=0 B=0  err=0x0
