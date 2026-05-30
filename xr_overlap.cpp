@@ -1,6 +1,5 @@
 #include "overlap.hpp"
 #include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
 #include <dispatch/eglproc_auto.hpp>
 
 #define DO_CHECK_GL_ERROR(msg) do { \
@@ -442,17 +441,13 @@ void RenderDepthOverlay(int width, int height) {
         DO_CHECK_GL_ERROR("after query sourceFBO attachments");
         
         if (srcDepthType == GL_TEXTURE && srcDepthId > 0) {
-            // Query depth texture dimensions via FBO attachment (GLES compatible)
-            GLint texWidth = 0, texHeight = 0;
+            // GLES has no GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_WIDTH/HEIGHT (desktop GL only)
+            // Use the already-known width/height for debug logging
+            GLint depthRedSize = 0;
             _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_WIDTH, &texWidth);
-            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_HEIGHT, &texHeight);
-            GLint texLayers = 0;
-            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_RED_SIZE, &texLayers);
+                GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &depthRedSize);
             DBG_LOG("Depth overlay: sourceFBO depth texture id=%d size=%dx%d redSize=%d",
-                    srcDepthId, texWidth, texHeight, texLayers);
+                    srcDepthId, width, height, depthRedSize);
             DO_CHECK_GL_ERROR("after query depth texture params");
         }
     }
