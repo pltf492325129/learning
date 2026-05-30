@@ -61,7 +61,6 @@ void main() {
 )";
 
 static const char* DEPTH_TO_COLOR_FRAGMENT_SHADER = R"(
-#extension GL_OES_depth_texture : require
 precision mediump float;
 uniform sampler2D u_depthTexture;
 varying vec2 v_texCoord;
@@ -259,6 +258,8 @@ void InitDepthOverlay(int width, int height) {
     
     GLint linkStatus = 0;
     _glGetProgramiv(gDepthToColorProgram, GL_LINK_STATUS, &linkStatus);
+    DBG_LOG("Depth overlay: depth-to-color program linkStatus=%d, vertShader=%d, fragShader=%d",
+            linkStatus, vertShader1, fragShader1);
     if (linkStatus == GL_FALSE) {
         GLint infoLen = 0;
         _glGetProgramiv(gDepthToColorProgram, GL_INFO_LOG_LENGTH, &infoLen);
@@ -561,35 +562,77 @@ void RenderDepthOverlay(int width, int height) {
     _glClear(GL_COLOR_BUFFER_BIT);
     DO_CHECK_GL_ERROR("after clear gDepthBlitFBO");
     CHECK_FBO_STATUS(gDepthBlitFBO, "gDepthBlitFBO");
-    
+
+    // Try shader-based depth-to-color conversion
     _glValidateProgram(gDepthToColorProgram);
     GLint validateStatus = 0;
     _glGetProgramiv(gDepthToColorProgram, GL_VALIDATE_STATUS, &validateStatus);
     DBG_LOG("Depth overlay: depthToColor program validate status=%d", validateStatus);
-    
-    _glUseProgram(gDepthToColorProgram);
-    DO_CHECK_GL_ERROR("after useProgram depthToColor");
-    
-    _glActiveTexture(GL_TEXTURE0);
-    _glBindTexture(GL_TEXTURE_2D, depthTextureToUse);
-    GLint depthTexLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
-    _glUniform1i(depthTexLoc, 0);
-    DBG_LOG("Depth overlay: u_depthTexture location=%d, binding texture=%d", depthTexLoc, depthTextureToUse);
-    DO_CHECK_GL_ERROR("after set depth texture uniform");    
-    GLint posLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
-    GLint texLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
-    DBG_LOG("Depth overlay: attribute locations - pos=%d, tex=%d", posLoc, texLoc);
-    
-    float vertices[] = { -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0 };
-    float texCoords[] = { 0, 0,  1, 0,  0, 1,  1, 1 };
-    
-    _glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-    _glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-    _glEnableVertexAttribArray(posLoc);
-    _glEnableVertexAttribArray(texLoc);
-    
-    _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    DO_CHECK_GL_ERROR("after draw depth-to-color");
+
+    if (validateStatus == 1) {
+        // Shader path: sample depth texture and render as grayscale
+        _glUseProgram(gDepthToColorProgram);
+        DO_CHECK_GL_ERROR("after useProgram depthToColor");
+
+        _glActiveTexture(GL_TEXTURE0);
+        _glBindTexture(GL_TEXTURE_2D, depthTextureToUse);
+        GLint depthTexLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
+        _glUniform1i(depthTexLoc, 0);
+        DBG_LOG("Depth overlay: u_depthTexture location=%d, binding texture=%d", depthTexLoc, depthTextureToUse);
+        DO_CHECK_GL_ERROR("after set depth texture uniform");
+        GLint posLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
+        GLint texLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+        DBG_LOG("Depth overlay: attribute locations - pos=%d, tex=%d", posLoc, texLoc);
+
+        float vertices[] = { -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0 };
+        float texCoords[] = { 0, 0,  1, 0,  0, 1,  1, 1 };
+
+        _glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+        _glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+        _glEnableVertexAttribArray(posLoc);
+        _glEnableVertexAttribArray(texLoc);
+
+        _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        DO_CHECK_GL_ERROR("after draw depth-to-color (shader path)");
+    } else {
+        // Fallback: read depth pixels via glReadPixels, convert to color, upload
+        // This works on all GLES 3.0+ devices but is slower (CPU readback)
+        DBG_LOG("Depth overlay: shader validate failed, using glReadPixels fallback");
+
+        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
+        float* depthPixels = new float[width * height];
+        _glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, depthPixels);
+        GLenum readErr = _glGetError();
+        if (readErr != GL_NO_ERROR) {
+            DBG_LOG("Depth overlay: glReadPixels depth failed, error=0x%x", readErr);
+            delete[] depthPixels;
+        } else {
+            // Convert depth float to grayscale RGBA8
+            unsigned char* colorPixels = new unsigned char[width * height * 4];
+            for (int i = 0; i < width * height; i++) {
+                unsigned char v = static_cast<unsigned char>(depthPixels[i] * 255.0f);
+                colorPixels[i * 4 + 0] = v;
+                colorPixels[i * 4 + 1] = v;
+                colorPixels[i * 4 + 2] = v;
+                colorPixels[i * 4 + 3] = 255;
+            }
+            delete[] depthPixels;
+
+            // Upload to gDepthBlitColorTex
+            _glBindTexture(GL_TEXTURE_2D, gDepthBlitColorTex);
+            _glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, colorPixels);
+            GLenum uploadErr = _glGetError();
+            if (uploadErr != GL_NO_ERROR) {
+                DBG_LOG("Depth overlay: glTexSubImage2D failed, error=0x%x", uploadErr);
+            } else {
+                DBG_LOG("Depth overlay: glReadPixels fallback uploaded depth as color");
+            }
+            delete[] colorPixels;
+        }
+
+        // Clear depth error state
+        while (_glGetError() != GL_NO_ERROR) {}
+    }
     
     _glBindFramebuffer(GL_FRAMEBUFFER, gOverlayFBO);
     CHECK_FBO_STATUS(gOverlayFBO, "gOverlayFBO");
