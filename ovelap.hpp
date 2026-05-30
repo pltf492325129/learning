@@ -5,7 +5,6 @@
 #include <atomic>
 #include <chrono>
 #include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
 
 #define DEPTH_OVERLAY_TRIGGER_FILE "/data/storage/el2/base/haps/inputs/results/depth_overlay"
 #define DEPTH_OVERLAY_STABLE_FRAME_THRESHOLD 30
@@ -30,6 +29,12 @@ extern GLuint gDepthToColorProgram;
 extern GLboolean gOverlayInitDone;
 extern int gOverlayWidth;
 extern int gOverlayHeight;
+
+// Depth capture globals (set by glBlitFramebuffer hook during frame rendering)
+extern GLuint gCapturedDepthFBO;
+extern int gCapturedDepthWidth;
+extern int gCapturedDepthHeight;
+extern bool gDepthCapturedThisFrame;
 
 void InitDepthOverlay(int width, int height);
 void UpdateDepthOverlay(int width, int height);
