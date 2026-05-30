@@ -1,6 +1,15 @@
 #include "overlap.hpp"
 #include <unordered_map>
 
+  GLuint gCapturedDepthFBO = 0;
+  int gCapturedDepthWidth = 0;
+  int gCapturedDepthHeight = 0;
+  bool gDepthCapturedThisFrame = false;
+
+  static GLuint sCapFBO = 0;
+  static GLuint sCapDepthTex = 0;
+  static int sCapW = 0, sCapH = 0;
+
 // Draw call tracking for depth buffer selection heuristic
 struct FBOStats {
     uint32_t draw_calls = 0;
