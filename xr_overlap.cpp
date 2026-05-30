@@ -492,80 +492,109 @@ void RenderDepthOverlay(int width, int height) {
 
     gDepthAvailableReported = false;
 
-    // DIAGNOSTIC: read one depth pixel directly from source FBO to verify depth data exists.
-    // Use GL_UNSIGNED_INT (not GL_FLOAT) — GL_FLOAT for depth is not supported on all GLES implementations.
+    // --- Diagnostic: try multiple methods to find one that can read depth ---
+    // Method A: GL_DEPTH_COMPONENT + GL_UNSIGNED_INT
+    // Method B: GL_DEPTH_STENCIL + GL_UNSIGNED_INT_24_8 (for packed DEPTH24_STENCIL8)
     {
-        GLuint srcDepthInt = 0xDEADBEEF;
         _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
-        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &srcDepthInt);
-        GLenum srcDepthErr = _glGetError();
-        float srcDepthFloat = srcDepthInt / (float)0xFFFFFFFF;
-        DBG_LOG("DIAG source depth: sourceFBO=%d center depth_uint=%u depth_float=%f, err=0x%x",
-                sourceFBO, srcDepthInt, srcDepthFloat, srcDepthErr);
-        GLint depthSize = 0;
+
+        // Clear any pending errors first
+        while (_glGetError() != GL_NO_ERROR) {}
+
+        // Try Method A: GL_DEPTH_COMPONENT + GL_UNSIGNED_INT
+        GLuint testValA = 0xDEADBEEF;
+        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &testValA);
+        GLenum errA = _glGetError();
+        while (_glGetError() != GL_NO_ERROR) {}
+
+        // Try Method B: GL_DEPTH_STENCIL + GL_UNSIGNED_INT_24_8
+        GLuint testValB = 0xDEADBEEF;
+        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, &testValB);
+        GLenum errB = _glGetError();
+        while (_glGetError() != GL_NO_ERROR) {}
+
+        DBG_LOG("DIAG depth read: MethodA(DEPTH_COMPONENT+UINT) val=0x%08X err=0x%x  MethodB(DEPTH_STENCIL+UINT_24_8) val=0x%08X err=0x%x",
+                testValA, errA, testValB, errB);
+
+        GLint depthSize = 0, stencilSize = 0;
         _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
             GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &depthSize);
-        DBG_LOG("DIAG source depth: depth component size=%d bits", depthSize);
+        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+            GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &stencilSize);
+        DBG_LOG("DIAG depth read: depth_size=%d bits, stencil_size=%d bits", depthSize, stencilSize);
         while (_glGetError() != GL_NO_ERROR) {}
     }
 
-    // --- Read depth via glReadPixels (GL_UNSIGNED_INT) and convert to color ---
-    // This is the most reliable method across all GLES 3.0 implementations.
-    // glReadPixels with GL_DEPTH_COMPONENT + GL_UNSIGNED_INT is guaranteed by the spec.
+    // --- Read depth via glReadPixels — try multiple format/type combinations ---
+    bool depthReadOk = false;
     {
-        DBG_LOG("Depth overlay: reading depth via glReadPixels GL_UNSIGNED_INT from FBO=%d", sourceFBO);
-
         _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
+        while (_glGetError() != GL_NO_ERROR) {}
 
         GLuint* depthPixels = new GLuint[width * height];
+
+        // Attempt 1: GL_DEPTH_COMPONENT + GL_UNSIGNED_INT
         _glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, depthPixels);
         GLenum readErr = _glGetError();
-        if (readErr != GL_NO_ERROR) {
-            DBG_LOG("Depth overlay: glReadPixels depth failed, error=0x%x", readErr);
+        if (readErr == GL_NO_ERROR) {
+            DBG_LOG("Depth overlay: depth readback OK via DEPTH_COMPONENT+UNSIGNED_INT");
+            depthReadOk = true;
+        }
+
+        // Attempt 2: GL_DEPTH_STENCIL + GL_UNSIGNED_INT_24_8
+        if (!depthReadOk) {
+            while (_glGetError() != GL_NO_ERROR) {}
+            _glReadPixels(0, 0, width, height, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, depthPixels);
+            readErr = _glGetError();
+            if (readErr == GL_NO_ERROR) {
+                DBG_LOG("Depth overlay: depth readback OK via DEPTH_STENCIL+UNSIGNED_INT_24_8");
+                depthReadOk = true;
+                // For UNSIGNED_INT_24_8: depth is in upper 24 bits, stencil in lower 8 bits
+                // Shift right by 8 to extract depth
+                for (int i = 0; i < width * height; i++) {
+                    depthPixels[i] = depthPixels[i] >> 8;
+                }
+            }
+        }
+
+        if (!depthReadOk) {
+            DBG_LOG("Depth overlay: ALL depth readback methods failed, err=0x%x", readErr);
             delete[] depthPixels;
-            _glBindFramebuffer(GL_FRAMEBUFFER, savedFBO);
-            _glUseProgram(savedProgram);
-            _glViewport(savedViewport[0], savedViewport[1], savedViewport[2], savedViewport[3]);
-            _glBindBuffer(GL_ARRAY_BUFFER, savedArrayBuffer);
-            _glBindTexture(GL_TEXTURE_2D, savedTexture2D);
-            _glActiveTexture(savedActiveTexture);
-            delete[] savedAttribEnable;
-            return;
-        }
-
-        // Log a few sample values for diagnostics
-        DBG_LOG("Depth overlay: depth readback OK, center=%u corners=(%u,%u,%u,%u)",
-                depthPixels[width/2 + (height/2)*width],
-                depthPixels[0],
-                depthPixels[width-1],
-                depthPixels[(height-1)*width],
-                depthPixels[width-1 + (height-1)*width]);
-
-        // Convert GLuint depth to grayscale RGBA8
-        // For 24-bit depth: max value is 0x00FFFFFF, normalized to 0.0~1.0
-        unsigned char* colorPixels = new unsigned char[width * height * 4];
-        GLuint depthMax = 0x00FFFFFF; // 24-bit depth max
-        for (int i = 0; i < width * height; i++) {
-            float normalized = (float)depthPixels[i] / (float)depthMax;
-            if (normalized > 1.0f) normalized = 1.0f;
-            unsigned char v = static_cast<unsigned char>(normalized * 255.0f);
-            colorPixels[i * 4 + 0] = v;
-            colorPixels[i * 4 + 1] = v;
-            colorPixels[i * 4 + 2] = v;
-            colorPixels[i * 4 + 3] = 255;
-        }
-        delete[] depthPixels;
-
-        // Upload to gDepthBlitColorTex
-        _glBindTexture(GL_TEXTURE_2D, gDepthBlitColorTex);
-        _glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, colorPixels);
-        GLenum uploadErr = _glGetError();
-        if (uploadErr != GL_NO_ERROR) {
-            DBG_LOG("Depth overlay: glTexSubImage2D failed, error=0x%x", uploadErr);
+            // Don't return — still show overlay with game content on left side
         } else {
-            DBG_LOG("Depth overlay: depth converted to color texture successfully");
+            // Log sample values
+            DBG_LOG("Depth overlay: depth readback OK, center=%u corners=(%u,%u,%u,%u)",
+                    depthPixels[width/2 + (height/2)*width],
+                    depthPixels[0],
+                    depthPixels[width-1],
+                    depthPixels[(height-1)*width],
+                    depthPixels[width-1 + (height-1)*width]);
+
+            // Convert GLuint depth to grayscale RGBA8
+            unsigned char* colorPixels = new unsigned char[width * height * 4];
+            GLuint depthMax = 0x00FFFFFF; // 24-bit depth max
+            for (int i = 0; i < width * height; i++) {
+                float normalized = (float)depthPixels[i] / (float)depthMax;
+                if (normalized > 1.0f) normalized = 1.0f;
+                unsigned char v = static_cast<unsigned char>(normalized * 255.0f);
+                colorPixels[i * 4 + 0] = v;
+                colorPixels[i * 4 + 1] = v;
+                colorPixels[i * 4 + 2] = v;
+                colorPixels[i * 4 + 3] = 255;
+            }
+            delete[] depthPixels;
+
+            _glBindTexture(GL_TEXTURE_2D, gDepthBlitColorTex);
+            _glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, colorPixels);
+            GLenum uploadErr = _glGetError();
+            if (uploadErr != GL_NO_ERROR) {
+                DBG_LOG("Depth overlay: glTexSubImage2D failed, error=0x%x", uploadErr);
+                depthReadOk = false;
+            } else {
+                DBG_LOG("Depth overlay: depth converted to color texture successfully");
+            }
+            delete[] colorPixels;
         }
-        delete[] colorPixels;
         while (_glGetError() != GL_NO_ERROR) {}
     }
 
