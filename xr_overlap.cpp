@@ -499,89 +499,75 @@ void RenderDepthOverlay(int width, int height) {
     DBG_LOG("Depth overlay: calling _glFinish() to flush tile-based GPU");
     _glFinish();
 
-    // === 深度数据存在性诊断（第二步：扫描所有 FBO）===
-    // 已确认 sourceFBO 的深度缓冲为空。现在需要找出哪个 FBO 还保留深度数据。
-    // 策略：直接在每个有 depth attachment 的 FBO 上做深度测试（不清除 depth），
-    //       如果某个 FBO 的深度测试通过了，说明数据在那里。
+    // === 验证帧中捕获的深度数据 ===
+    // 在 glBlitFramebuffer hook 中，游戏做 depth blit 时我们同步捕获了深度。
+    // gCapturedDepthFBO 里有捕获的深度数据。验证它是否非空。
     {
-        DBG_LOG("DIAG scan: scanning FBOs for non-empty depth buffer...");
-        _glViewport(0, 0, width, height);
-        _glUseProgram(gDepthToColorProgram);
-        _glActiveTexture(GL_TEXTURE0);
-        _glBindTexture(GL_TEXTURE_2D, 0);
-        _glUniform1i(_glGetUniformLocation(gDepthToColorProgram, "u_depthTexture"), 0);
-        GLint diagPosLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
-        GLint diagTexLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
-        if (diagTexLoc >= 0) _glDisableVertexAttribArray(diagTexLoc);
-        _glEnableVertexAttribArray(diagPosLoc);
-        // 使用 Z=0.0 → depth=0.5 阈值，足够检测大部分场景深度
-        float diagVerts[] = { -1,-1,0.0f, 1,-1,0.0f, -1,1,0.0f, 1,1,0.0f };
-        _glVertexAttribPointer(diagPosLoc, 3, GL_FLOAT, GL_FALSE, 0, diagVerts);
+        if (gDepthCapturedThisFrame && gCapturedDepthFBO != 0) {
+            DBG_LOG("DIAG capture: depth was captured this frame, capFBO=%d %dx%d",
+                    gCapturedDepthFBO, gCapturedDepthWidth, gCapturedDepthHeight);
 
-        GLuint foundFBO = 0;
-        GLubyte foundPixel[4] = {0};
-
-        // 扫描 FBO 1-512（包括 sourceFBO 和其他候选）
-        for (GLuint fbo = 1; fbo <= 512; fbo++) {
-            _glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            GLenum fbStatus = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
-            if (fbStatus != GL_FRAMEBUFFER_COMPLETE) continue;
-
-            // 检查是否有 depth attachment
-            GLint depthType = GL_NONE;
-            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &depthType);
-            if (depthType != GL_TEXTURE && depthType != GL_RENDERBUFFER) continue;
-
-            // 检查是否有 color attachment（需要写颜色来读回结果）
+            // 在捕获的 FBO 上做深度测试来验证数据
+            // 需要一个 color attachment 来读回结果，所以先附加一个临时 color
+            bool needColorAttach = false;
+            _glBindFramebuffer(GL_FRAMEBUFFER, gCapturedDepthFBO);
             GLint colorType = GL_NONE;
             _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &colorType);
-            if (colorType != GL_TEXTURE && colorType != GL_RENDERBUFFER) continue;
+            if (colorType != GL_TEXTURE && colorType != GL_RENDERBUFFER) {
+                // 没有颜色附件，临时附加一个
+                needColorAttach = true;
+                if (!gTempDummyColorTex) {
+                    _glGenTextures(1, &gTempDummyColorTex);
+                }
+                _glBindTexture(GL_TEXTURE_2D, gTempDummyColorTex);
+                _glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8,
+                                gCapturedDepthWidth, gCapturedDepthHeight);
+                _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        GL_TEXTURE_2D, gTempDummyColorTex, 0);
+            }
 
-            // 检查 FBO 尺寸是否匹配
-            GLint fboWidth = 0, fboHeight = 0;
-            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &fboWidth); // temp reuse
-            // 简单用 viewport 尺寸检查：如果 viewport 设置后不匹配就跳过
-            // 这里直接尝试，失败无害
+            GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+            _glDrawBuffers(1, drawBuffers);
 
-            // 执行深度测试
+            _glViewport(0, 0, gCapturedDepthWidth, gCapturedDepthHeight);
             _glClearColor(1.0f, 0.0f, 0.0f, 1.0f);  // RED
-            _glClear(GL_COLOR_BUFFER_BIT);  // 只清 color
+            _glClear(GL_COLOR_BUFFER_BIT);  // 只清 color，不清 depth！
+
+            _glUseProgram(gDepthToColorProgram);
+            _glActiveTexture(GL_TEXTURE0);
+            _glBindTexture(GL_TEXTURE_2D, 0);
+            _glUniform1i(_glGetUniformLocation(gDepthToColorProgram, "u_depthTexture"), 0);
+            GLint diagPosLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
+            GLint diagTexLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+            if (diagTexLoc >= 0) _glDisableVertexAttribArray(diagTexLoc);
+            _glEnableVertexAttribArray(diagPosLoc);
+            // Z=0.0 → depth threshold = 0.5
+            float dv[] = { -1,-1,0.0f, 1,-1,0.0f, -1,1,0.0f, 1,1,0.0f };
+            _glVertexAttribPointer(diagPosLoc, 3, GL_FLOAT, GL_FALSE, 0, dv);
+
             _glEnable(GL_DEPTH_TEST);
             _glDepthFunc(GL_LESS);
             _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             _glDisable(GL_DEPTH_TEST);
 
             GLubyte dp[4] = {0};
-            _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, dp);
-            GLenum readErr = _glGetError();
+            _glReadPixels(gCapturedDepthWidth/2, gCapturedDepthHeight/2, 1, 1,
+                          GL_RGBA, GL_UNSIGNED_BYTE, dp);
+            DBG_LOG("DIAG capture: depth test on capFBO R=%d G=%d B=%d (%s)",
+                    dp[0], dp[1], dp[2],
+                    dp[0] == 0 ? "BLACK=DATA_EXISTS!" : "RED=empty");
 
-            if (readErr != GL_NO_ERROR) {
-                // FBO 尺寸可能不匹配，跳过
-                continue;
-            }
-
-            if (dp[0] == 0) {  // BLACK = depth test passed = depth data exists!
-                GLint depthId = 0;
-                _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                    GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &depthId);
-                DBG_LOG("DIAG scan: FBO=%d has depth DATA! depthType=0x%x depthId=%d pixel=R%dG%dB%d",
-                        fbo, depthType, depthId, dp[0], dp[1], dp[2]);
-                foundFBO = fbo;
-                foundPixel[0] = dp[0]; foundPixel[1] = dp[1]; foundPixel[2] = dp[2]; foundPixel[3] = dp[3];
+            if (dp[0] == 0) {
+                DBG_LOG("DIAG capture: CONCLUSION=DEPTH_DATA_CAPTURED_SUCCESSFULLY");
+            } else {
+                DBG_LOG("DIAG capture: CONCLUSION=CAPTURED_BUT_EMPTY (capture failed?)");
             }
             while (_glGetError() != GL_NO_ERROR) {}
-        }
-
-        if (foundFBO != 0) {
-            DBG_LOG("DIAG scan: CONCLUSION=FOUND depth data in FBO=%d (sourceFBO=%d was empty)",
-                    foundFBO, sourceFBO);
         } else {
-            DBG_LOG("DIAG scan: CONCLUSION=NO depth data in ANY FBO 1-512");
+            DBG_LOG("DIAG capture: NO depth captured this frame (gDepthCaptured=%d capFBO=%d)",
+                    gDepthCapturedThisFrame ? 1 : 0, gCapturedDepthFBO);
         }
-        while (_glGetError() != GL_NO_ERROR) {}
     }
 
     bool depthReadOk = false;
