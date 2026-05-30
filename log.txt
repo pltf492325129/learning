@@ -1,21 +1,59 @@
-	行  191: 05-30 15:16:29.697  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,516: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  194: 05-30 15:16:29.699  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,553: [DEBUG] DIAG depth-test: center R=255 G=0 B=0  left R=255 G=0 B=0  right R=255 G=0 B=0
-	行  195: 05-30 15:16:29.699  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] DIAG depth-test: data_exists=LIKELY (mixed=NO)
-	行  371: 05-30 15:16:29.766  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,516: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  373: 05-30 15:16:29.768  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,553: [DEBUG] DIAG depth-test: center R=255 G=0 B=0  left R=255 G=0 B=0  right R=255 G=0 B=0
-	行  374: 05-30 15:16:29.768  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] DIAG depth-test: data_exists=LIKELY (mixed=NO)
-	行  552: 05-30 15:16:29.841  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,516: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  553: 05-30 15:16:29.843  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,553: [DEBUG] DIAG depth-test: center R=255 G=0 B=0  left R=255 G=0 B=0  right R=255 G=0 B=0
-	行  554: 05-30 15:16:29.843  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] DIAG depth-test: data_exists=LIKELY (mixed=NO)
-	行  802: 05-30 15:16:29.917  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,516: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  804: 05-30 15:16:29.919  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,553: [DEBUG] DIAG depth-test: center R=255 G=0 B=0  left R=255 G=0 B=0  right R=255 G=0 B=0
-	行  805: 05-30 15:16:29.919  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] DIAG depth-test: data_exists=LIKELY (mixed=NO)
-	行  986: 05-30 15:16:29.985  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,516: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行  987: 05-30 15:16:29.987  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,553: [DEBUG] DIAG depth-test: center R=255 G=0 B=0  left R=255 G=0 B=0  right R=255 G=0 B=0
-	行  988: 05-30 15:16:29.987  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] DIAG depth-test: data_exists=LIKELY (mixed=NO)
-	行 1170: 05-30 15:16:30.053  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,516: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行 1171: 05-30 15:16:30.055  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,553: [DEBUG] DIAG depth-test: center R=255 G=0 B=0  left R=255 G=0 B=0  right R=255 G=0 B=0
-	行 1172: 05-30 15:16:30.055  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] DIAG depth-test: data_exists=LIKELY (mixed=NO)
-	行 1358: 05-30 15:16:30.125  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,516: [DEBUG] DIAG depth-test: depth blit err=0x0
-	行 1359: 05-30 15:16:30.126  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,553: [DEBUG] DIAG depth-test: center R=255 G=0 B=0  left R=255 G=0 B=0  right R=255 G=0 B=0
-	行 1360: 05-30 15:16:30.127  9093  9888 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,561: [DEBUG] DIAG depth-test: data_exists=LIKELY (mixed=NO)
+	行    31: 05-30 15:25:58.245 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行    32: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行    33: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行    34: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行    35: 05-30 15:25:58.251 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行    36: 05-30 15:25:58.252 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行   206: 05-30 15:25:58.333 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行   207: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行   208: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行   209: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行   210: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行   211: 05-30 15:25:58.339 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行   382: 05-30 15:25:58.413 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行   384: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行   385: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行   386: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行   387: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行   388: 05-30 15:25:58.421 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行   555: 05-30 15:25:58.503 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行   556: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行   557: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行   558: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行   559: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行   560: 05-30 15:25:58.510 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行   752: 05-30 15:25:58.585 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行   753: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行   754: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行   755: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行   756: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行   757: 05-30 15:25:58.590 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行   923: 05-30 15:25:58.667 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行   924: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行   925: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行   926: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行   927: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行   928: 05-30 15:25:58.673 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行  1095: 05-30 15:25:58.750 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行  1097: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行  1098: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行  1099: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行  1100: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行  1101: 05-30 15:25:58.756 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行  1266: 05-30 15:25:58.842 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行  1267: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行  1268: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行  1269: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行  1270: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行  1271: 05-30 15:25:58.848 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行  1436: 05-30 15:25:58.940 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行  1437: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行  1438: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行  1439: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行  1440: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
+	行  1441: 05-30 15:25:58.946 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,578: [DEBUG] DIAG depth-test: CONCLUSION=DEPTH_BUFFER_EMPTY (all tests failed, depth buffer likely zero)
+	行  1608: 05-30 15:25:59.019 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,521: [DEBUG] DIAG depth-test: depth blit err=0x0
+	行  1609: 05-30 15:25:59.025 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,563: [DEBUG] DIAG depth-test: threshold depth=0.00(Z=-1.0): R=255 (RED=fail)
+	行  1610: 05-30 15:25:59.026 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,565: [DEBUG] DIAG depth-test: threshold depth=0.25(Z=-0.5): R=255 (RED=fail)
+	行  1611: 05-30 15:25:59.026 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,567: [DEBUG] DIAG depth-test: threshold depth=0.50(Z= 0.0): R=255 (RED=fail)
+	行  1612: 05-30 15:25:59.026 14189 14878 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,569: [DEBUG] DIAG depth-test: threshold depth=0.75(Z= 0.5): R=255 (RED=fail)
