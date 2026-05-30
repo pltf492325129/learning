@@ -1,4 +1,12 @@
+#include "overlap.hpp"
+#include <unordered_map>
 
+// Draw call tracking for depth buffer selection heuristic
+struct FBOStats {
+    uint32_t draw_calls = 0;
+    uint32_t vertices = 0;
+};
+static std::unordered_map<GLuint, FBOStats> g_fbo_draw_stats;
 
 void GLES_CALLCONVENTION patrace_glBindFramebuffer(GLenum target, GLuint framebuffer){
     unsigned char tid = GetThreadId();
@@ -32,6 +40,18 @@ void GLES_CALLCONVENTION patrace_glBindFramebuffer(GLenum target, GLuint framebu
     }
 
     _glBindFramebuffer(target, framebuffer);
+
+    // Check if this FBO has a depth attachment for depth overlay
+    if (framebuffer != 0 && (target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)) {
+        GLint depthType = GL_NONE;
+        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &depthType);
+        if (depthType == GL_TEXTURE || depthType == GL_RENDERBUFFER) {
+            gLastDepthBlitTargetFBO = framebuffer;
+            DBG_LOG("Depth overlay: FBO=%d has depth attachment type=0x%x", framebuffer, depthType);
+        }
+    }
+
     --gTraceThread[tid].mCallDepth;
 
     // save parameters
@@ -111,6 +131,26 @@ EGLBoolean GLES_CALLCONVENTION patrace_eglSwapBuffers(EGLDisplay dpy, EGLSurface
     gTraceOut->callNo++;
     
     checkTextureTypeDepth();
+
+    // Select best depth FBO based on draw stats (heuristic from ReShade approach)
+    {
+        GLuint bestDepthFBO = 0;
+        uint32_t bestScore = 0;
+        for (const auto& entry : g_fbo_draw_stats) {
+            uint32_t score = entry.second.draw_calls + entry.second.vertices / 100;
+            if (score > bestScore) {
+                bestScore = score;
+                bestDepthFBO = entry.first;
+            }
+        }
+        if (bestDepthFBO != 0) {
+            gLastDepthBlitTargetFBO = bestDepthFBO;
+            DBG_LOG("Depth overlay: selected best depth FBO=%d (draws=%u, verts=%u)",
+                    bestDepthFBO, g_fbo_draw_stats[bestDepthFBO].draw_calls,
+                    g_fbo_draw_stats[bestDepthFBO].vertices);
+        }
+        g_fbo_draw_stats.clear();
+    }
 
     UpdateDepthOverlay(width, height);
 
@@ -199,6 +239,13 @@ void GLES_CALLCONVENTION patrace_glDrawArrays(GLenum mode, GLint first, GLsizei 
     if (g_frame_id < client_draw_frame) {
         _glDrawArrays(mode, first, count);
     }
+
+    // Track draw calls for depth buffer selection heuristic
+    if (g_current_binding != 0) {
+        g_fbo_draw_stats[g_current_binding].draw_calls++;
+        g_fbo_draw_stats[g_current_binding].vertices += count;
+    }
+
     --gTraceThread[tid].mCallDepth;
 
     // save parameters
@@ -269,6 +316,13 @@ void GLES_CALLCONVENTION patrace_glDrawElements(GLenum mode, GLsizei count, GLen
     if (g_frame_id < client_draw_frame) {
         _glDrawElements(mode, count, type, indices);
     }
+
+    // Track draw calls for depth buffer selection heuristic
+    if (g_current_binding != 0) {
+        g_fbo_draw_stats[g_current_binding].draw_calls++;
+        g_fbo_draw_stats[g_current_binding].vertices += count;
+    }
+
     --gTraceThread[tid].mCallDepth;
 
     // save parameters
@@ -316,4 +370,3 @@ void GLES_CALLCONVENTION patrace_glDrawElements(GLenum mode, GLsizei count, GLen
     // traceFunctionBody_after
     after_glDraw();
 }
-
