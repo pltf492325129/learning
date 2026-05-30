@@ -562,7 +562,10 @@ void RenderDepthOverlay(int width, int height) {
         while (_glGetError() != GL_NO_ERROR) {}
     }
 
-    // === Method 2: glBlitFramebuffer (works on some devices where shader sampling doesn't) ===
+    // === Method 2: glBlitFramebuffer (the game itself uses this successfully!) ===
+    // On this device, glReadPixels for depth always fails with GL_INVALID_ENUM,
+    // but glBlitFramebuffer(GL_DEPTH_BUFFER_BIT) succeeds (err=0x0).
+    // So we blit depth to our temp texture, then use shader to convert depth→color.
     if (!depthReadOk && EnsureTempDepthResources(width, height)) {
         DBG_LOG("Depth overlay: trying glBlitFramebuffer depth blit");
         while (_glGetError() != GL_NO_ERROR) {}
@@ -573,15 +576,9 @@ void RenderDepthOverlay(int width, int height) {
         GLenum blitErr = _glGetError();
         DBG_LOG("Depth overlay: depth blit err=0x%x", blitErr);
 
-        // Read one depth pixel from temp FBO to verify
-        GLuint blitDepthVal = 0xDEADBEEF;
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
-        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &blitDepthVal);
-        GLenum readErr = _glGetError();
-        DBG_LOG("DIAG blit: gTempDepthFBO depth=0x%08X err=0x%x", blitDepthVal, readErr);
-
-        if (blitErr == GL_NO_ERROR && blitDepthVal != 0xDEADBEEF && blitDepthVal != 0) {
-            // Blit worked! Now use shader to convert depth texture to color
+        if (blitErr == GL_NO_ERROR) {
+            // Blit succeeded! Skip glReadPixels verification (not supported on this device).
+            // Directly use shader to sample gTempDepthTex and convert to color.
             _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
             _glViewport(0, 0, width, height);
             {
@@ -592,6 +589,14 @@ void RenderDepthOverlay(int width, int height) {
             _glClear(GL_COLOR_BUFFER_BIT);
             _glDisable(GL_DEPTH_TEST);
             while (_glGetError() != GL_NO_ERROR) {}
+
+            // Make sure gTempDepthTex has correct sampling params
+            _glBindTexture(GL_TEXTURE_2D, gTempDepthTex);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
             _glUseProgram(gDepthToColorProgram);
             _glActiveTexture(GL_TEXTURE0);
@@ -606,14 +611,22 @@ void RenderDepthOverlay(int width, int height) {
             _glEnableVertexAttribArray(tLoc);
             _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+            GLenum shaderErr = _glGetError();
+            DBG_LOG("Depth overlay: blit+shader draw err=0x%x, dLoc=%d, pLoc=%d, tLoc=%d",
+                    shaderErr, dLoc, pLoc, tLoc);
+
+            // Verify shader output via COLOR glReadPixels (this works on this device!)
             GLubyte bpixel[4] = {0, 0, 0, 0};
             _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
             _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, bpixel);
             DBG_LOG("DIAG blit+shader: gDepthBlitFBO center R=%d G=%d B=%d A=%d",
                     bpixel[0], bpixel[1], bpixel[2], bpixel[3]);
+
             if (bpixel[0] > 0 || bpixel[1] > 0 || bpixel[2] > 0) {
                 depthReadOk = true;
                 DBG_LOG("Depth overlay: blit+shader SUCCESS!");
+            } else {
+                DBG_LOG("Depth overlay: blit succeeded but shader output is still 0");
             }
         }
         while (_glGetError() != GL_NO_ERROR) {}
