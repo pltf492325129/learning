@@ -473,9 +473,7 @@ void RenderDepthOverlay(int width, int height) {
             gFrameCount, width, height, sourceFBO, colorAttachmentId, depthAttachmentType, depthAttachmentId, currentFBO);
     DBG_LOG("Depth overlay: shader programs - depthToColor=%d, sideBySide=%d, gDepthBlitFBO=%d, gOverlayFBO=%d",
             gDepthToColorProgram, gSideBySideProgram, gDepthBlitFBO, gOverlayFBO);
-    
-    GLuint depthTextureToUse = 0;
-    
+
     if (colorAttachmentId == 0 || depthAttachmentId == 0) {
         if (!gDepthAvailableReported) {
             DBG_LOG("Depth overlay: no color or depth attachment, colorId=%d, depthId=%d", 
@@ -494,51 +492,36 @@ void RenderDepthOverlay(int width, int height) {
 
     gDepthAvailableReported = false;
 
-    // DIAGNOSTIC: read one depth pixel directly from source FBO to verify depth data exists
+    // DIAGNOSTIC: read one depth pixel directly from source FBO to verify depth data exists.
+    // Use GL_UNSIGNED_INT (not GL_FLOAT) — GL_FLOAT for depth is not supported on all GLES implementations.
     {
-        GLfloat srcDepthVal = -1.0f;
+        GLuint srcDepthInt = 0xDEADBEEF;
         _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
-        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &srcDepthVal);
+        _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &srcDepthInt);
         GLenum srcDepthErr = _glGetError();
-        DBG_LOG("DIAG source depth: sourceFBO=%d center depth=%f, glReadPixels err=0x%x",
-                sourceFBO, srcDepthVal, srcDepthErr);
-        // Also query the depth size to understand the format
+        float srcDepthFloat = srcDepthInt / (float)0xFFFFFFFF;
+        DBG_LOG("DIAG source depth: sourceFBO=%d center depth_uint=%u depth_float=%f, err=0x%x",
+                sourceFBO, srcDepthInt, srcDepthFloat, srcDepthErr);
         GLint depthSize = 0;
         _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
             GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &depthSize);
         DBG_LOG("DIAG source depth: depth component size=%d bits", depthSize);
-        while (_glGetError() != GL_NO_ERROR) {} // clear any errors from size query
+        while (_glGetError() != GL_NO_ERROR) {}
     }
 
-    if (depthAttachmentType == GL_TEXTURE) {
-        // KEY FIX: Use the original depth texture directly in the shader.
-        // No blit needed — avoids format mismatch issues with glBlitFramebuffer.
-        // The source FBO's depth texture can be sampled directly as long as
-        // the FBO is not simultaneously bound as draw target (which it isn't —
-        // we bind gDepthBlitFBO for drawing).
-        depthTextureToUse = depthAttachmentId;
-
-        // Override texture parameters to ensure sampling works.
-        // The game may have set compare mode or mipmapped filtering.
-        _glBindTexture(GL_TEXTURE_2D, depthTextureToUse);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        DBG_LOG("Depth overlay: using original depth TEXTURE id=%d directly (no blit)", depthTextureToUse);
-    } else if (depthAttachmentType == GL_RENDERBUFFER) {
-        // Renderbuffers cannot be sampled as textures.
-        // Use glReadPixels fallback to read depth, convert to color, upload to gDepthBlitColorTex.
-        DBG_LOG("Depth overlay: depth is RENDERBUFFER id=%d, using glReadPixels fallback", depthAttachmentId);
+    // --- Read depth via glReadPixels (GL_UNSIGNED_INT) and convert to color ---
+    // This is the most reliable method across all GLES 3.0 implementations.
+    // glReadPixels with GL_DEPTH_COMPONENT + GL_UNSIGNED_INT is guaranteed by the spec.
+    {
+        DBG_LOG("Depth overlay: reading depth via glReadPixels GL_UNSIGNED_INT from FBO=%d", sourceFBO);
 
         _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
-        // Read a small region for speed (center area for diagnostics)
-        float* depthPixels = new float[width * height];
-        _glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, depthPixels);
+
+        GLuint* depthPixels = new GLuint[width * height];
+        _glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, depthPixels);
         GLenum readErr = _glGetError();
         if (readErr != GL_NO_ERROR) {
-            DBG_LOG("Depth overlay: glReadPixels depth from RENDERBUFFER failed, error=0x%x", readErr);
+            DBG_LOG("Depth overlay: glReadPixels depth failed, error=0x%x", readErr);
             delete[] depthPixels;
             _glBindFramebuffer(GL_FRAMEBUFFER, savedFBO);
             _glUseProgram(savedProgram);
@@ -550,12 +533,22 @@ void RenderDepthOverlay(int width, int height) {
             return;
         }
 
-        DBG_LOG("Depth overlay: RENDERBUFFER readback center depth=%f", depthPixels[width/2 + (height/2)*width]);
+        // Log a few sample values for diagnostics
+        DBG_LOG("Depth overlay: depth readback OK, center=%u corners=(%u,%u,%u,%u)",
+                depthPixels[width/2 + (height/2)*width],
+                depthPixels[0],
+                depthPixels[width-1],
+                depthPixels[(height-1)*width],
+                depthPixels[width-1 + (height-1)*width]);
 
-        // Convert depth float to grayscale RGBA8 and upload to gDepthBlitColorTex
+        // Convert GLuint depth to grayscale RGBA8
+        // For 24-bit depth: max value is 0x00FFFFFF, normalized to 0.0~1.0
         unsigned char* colorPixels = new unsigned char[width * height * 4];
+        GLuint depthMax = 0x00FFFFFF; // 24-bit depth max
         for (int i = 0; i < width * height; i++) {
-            unsigned char v = static_cast<unsigned char>(depthPixels[i] * 255.0f);
+            float normalized = (float)depthPixels[i] / (float)depthMax;
+            if (normalized > 1.0f) normalized = 1.0f;
+            unsigned char v = static_cast<unsigned char>(normalized * 255.0f);
             colorPixels[i * 4 + 0] = v;
             colorPixels[i * 4 + 1] = v;
             colorPixels[i * 4 + 2] = v;
@@ -563,80 +556,17 @@ void RenderDepthOverlay(int width, int height) {
         }
         delete[] depthPixels;
 
+        // Upload to gDepthBlitColorTex
         _glBindTexture(GL_TEXTURE_2D, gDepthBlitColorTex);
         _glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, colorPixels);
         GLenum uploadErr = _glGetError();
         if (uploadErr != GL_NO_ERROR) {
-            DBG_LOG("Depth overlay: glTexSubImage2D for RENDERBUFFER depth failed, error=0x%x", uploadErr);
+            DBG_LOG("Depth overlay: glTexSubImage2D failed, error=0x%x", uploadErr);
         } else {
-            DBG_LOG("Depth overlay: RENDERBUFFER depth converted to color texture successfully");
+            DBG_LOG("Depth overlay: depth converted to color texture successfully");
         }
         delete[] colorPixels;
         while (_glGetError() != GL_NO_ERROR) {}
-
-        // For RENDERBUFFER path, we already have the color data in gDepthBlitColorTex.
-        // Set depthTextureToUse = 0 to signal skip shader conversion.
-        depthTextureToUse = 0;
-    } else {
-        DBG_LOG("Depth overlay: unknown depth attachment type=0x%x", depthAttachmentType);
-        _glBindFramebuffer(GL_FRAMEBUFFER, savedFBO);
-        _glUseProgram(savedProgram);
-        _glViewport(savedViewport[0], savedViewport[1], savedViewport[2], savedViewport[3]);
-        _glBindBuffer(GL_ARRAY_BUFFER, savedArrayBuffer);
-        _glBindTexture(GL_TEXTURE_2D, savedTexture2D);
-        _glActiveTexture(savedActiveTexture);
-        delete[] savedAttribEnable;
-        return;
-    }
-
-    // --- Shader depth-to-color conversion (TEXTURE path only) ---
-    if (depthTextureToUse != 0) {
-        _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
-        _glViewport(0, 0, width, height);
-        {
-            GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-            _glDrawBuffers(1, drawBuffers);
-        }
-        DO_CHECK_GL_ERROR("after set drawBuffers for gDepthBlitFBO");
-        _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        _glClear(GL_COLOR_BUFFER_BIT);
-        DO_CHECK_GL_ERROR("after clear gDepthBlitFBO");
-        CHECK_FBO_STATUS(gDepthBlitFBO, "gDepthBlitFBO");
-
-        // Shader path: sample depth texture and render as grayscale
-        _glUseProgram(gDepthToColorProgram);
-        DO_CHECK_GL_ERROR("after useProgram depthToColor");
-
-        _glActiveTexture(GL_TEXTURE0);
-        _glBindTexture(GL_TEXTURE_2D, depthTextureToUse);
-        GLint depthTexLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
-        _glUniform1i(depthTexLoc, 0);
-        DBG_LOG("Depth overlay: u_depthTexture location=%d, binding texture=%d", depthTexLoc, depthTextureToUse);
-        DO_CHECK_GL_ERROR("after set depth texture uniform");
-        GLint posLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
-        GLint texLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
-        DBG_LOG("Depth overlay: attribute locations - pos=%d, tex=%d", posLoc, texLoc);
-
-        float vertices[] = { -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0 };
-        float texCoords[] = { 0, 0,  1, 0,  0, 1,  1, 1 };
-
-        _glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-        _glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-        _glEnableVertexAttribArray(posLoc);
-        _glEnableVertexAttribArray(texLoc);
-
-        _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        DO_CHECK_GL_ERROR("after draw depth-to-color (shader path)");
-
-        // DIAGNOSTIC: verify shader produced color output
-        {
-            GLubyte pixel[4] = {0, 0, 0, 0};
-            _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
-            _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-            GLenum diagErr = _glGetError();
-            DBG_LOG("DIAG shader output: gDepthBlitFBO center R=%d G=%d B=%d A=%d, err=0x%x",
-                    pixel[0], pixel[1], pixel[2], pixel[3], diagErr);
-        }
     }
 
     // --- Overlay assembly ---
