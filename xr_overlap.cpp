@@ -512,6 +512,18 @@ void RenderDepthOverlay(int width, int height) {
         _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
         _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gTempDepthFBO);
         _glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        DO_CHECK_GL_ERROR("after depth blit (TEXTURE path)");
+
+        // DIAGNOSTIC: verify depth blit transferred data
+        {
+            GLfloat depthVal = -1.0f;
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
+            _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depthVal);
+            GLenum diagErr = _glGetError();
+            DBG_LOG("DIAG depth blit(TEXTURE): gTempDepthFBO center depth=%f, err=0x%x", depthVal, diagErr);
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
+            _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gTempDepthFBO);
+        }
 
         depthTextureToUse = gTempDepthTex;
 
@@ -535,6 +547,18 @@ void RenderDepthOverlay(int width, int height) {
         _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gTempDepthFBO);
         _glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
                           GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        DO_CHECK_GL_ERROR("after depth blit (RENDERBUFFER path)");
+
+        // DIAGNOSTIC: verify depth blit transferred data
+        {
+            GLfloat depthVal = -1.0f;
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
+            _glReadPixels(width/2, height/2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depthVal);
+            GLenum diagErr = _glGetError();
+            DBG_LOG("DIAG depth blit(RENDERBUFFER): gTempDepthFBO center depth=%f, err=0x%x", depthVal, diagErr);
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
+            _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gTempDepthFBO);
+        }
 
         depthTextureToUse = gTempDepthTex;
 
@@ -594,6 +618,16 @@ void RenderDepthOverlay(int width, int height) {
 
         _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         DO_CHECK_GL_ERROR("after draw depth-to-color (shader path)");
+
+        // DIAGNOSTIC: verify shader produced color output
+        {
+            GLubyte pixel[4] = {0, 0, 0, 0};
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
+            _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+            GLenum diagErr = _glGetError();
+            DBG_LOG("DIAG shader output: gDepthBlitFBO center R=%d G=%d B=%d A=%d, err=0x%x",
+                    pixel[0], pixel[1], pixel[2], pixel[3], diagErr);
+        }
     } else {
         // Fallback: read depth pixels via glReadPixels, convert to color, upload
         // This works on all GLES 3.0+ devices but is slower (CPU readback)
@@ -643,7 +677,19 @@ void RenderDepthOverlay(int width, int height) {
     DO_CHECK_GL_ERROR("after clear gOverlayFBO");
     
     _glDisable(GL_SCISSOR_TEST);
-    
+
+    // DIAGNOSTIC: verify game content exists in currentFBO before blit
+    {
+        GLubyte pixel[4] = {0, 0, 0, 0};
+        _glBindFramebuffer(GL_READ_FRAMEBUFFER, currentFBO);
+        if (currentFBO == 0) _glReadBuffer(GL_BACK);
+        else _glReadBuffer(GL_COLOR_ATTACHMENT0);
+        _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+        GLenum diagErr = _glGetError();
+        DBG_LOG("DIAG game content: currentFBO=%d center R=%d G=%d B=%d A=%d, err=0x%x",
+                currentFBO, pixel[0], pixel[1], pixel[2], pixel[3], diagErr);
+    }
+
     DBG_LOG("Depth overlay: first blit - read from currentFBO=%d to gOverlayFBO left half", currentFBO);
     _glBindFramebuffer(GL_READ_FRAMEBUFFER, currentFBO);
     _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gOverlayFBO);
@@ -663,6 +709,19 @@ void RenderDepthOverlay(int width, int height) {
     _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
     _glBlitFramebuffer(0, 0, width, height, width/2, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
     DO_CHECK_GL_ERROR("after second blit (depth to right)");
+
+    // DIAGNOSTIC: verify overlay FBO has both halves
+    {
+        GLubyte pixelL[4] = {0, 0, 0, 0}, pixelR[4] = {0, 0, 0, 0};
+        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gOverlayFBO);
+        _glReadBuffer(GL_COLOR_ATTACHMENT0);
+        _glReadPixels(width/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixelL);
+        _glReadPixels(width*3/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixelR);
+        GLenum diagErr = _glGetError();
+        DBG_LOG("DIAG overlay: left(%d,%d) R=%d G=%d B=%d  right(%d,%d) R=%d G=%d B=%d  err=0x%x",
+                width/4, height/2, pixelL[0], pixelL[1], pixelL[2],
+                width*3/4, height/2, pixelR[0], pixelR[1], pixelR[2], diagErr);
+    }
     
     DBG_LOG("Depth overlay: final blit - from gOverlayFBO=%d to savedFBO=%d", gOverlayFBO, savedFBO);
     _glBindFramebuffer(GL_READ_FRAMEBUFFER, gOverlayFBO);
