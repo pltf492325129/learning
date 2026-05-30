@@ -499,6 +499,72 @@ void RenderDepthOverlay(int width, int height) {
     DBG_LOG("Depth overlay: calling _glFinish() to flush tile-based GPU");
     _glFinish();
 
+    // === 深度数据存在性诊断 ===
+    // 用 GPU 硬件深度测试（非纹理采样）来确认 blit 后的深度数据是否存在。
+    // 原理：blit depth 到临时 FBO，清除 color 为 RED，绘制 Z=0.5 的黑色 quad。
+    // 深度测试 GL_LESS: quad Z(0.5) < stored depth → PASS → 写黑色；否则保持红色。
+    // 如果看到混合色 → 深度数据存在；全红或全黑 → 数据可能为空。
+    {
+        if (EnsureTempDepthResources(width, height)) {
+            // Step 1: Blit depth to temp FBO
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
+            _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gTempDepthFBO);
+            while (_glGetError() != GL_NO_ERROR) {}
+            _glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+                               GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            GLenum diagBlitErr = _glGetError();
+            DBG_LOG("DIAG depth-test: depth blit err=0x%x", diagBlitErr);
+
+            // Step 2: Depth test diagnostic
+            _glBindFramebuffer(GL_FRAMEBUFFER, gTempDepthFBO);
+            _glViewport(0, 0, width, height);
+            {
+                GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+                _glDrawBuffers(1, drawBuffers);
+            }
+            _glClearColor(1.0f, 0.0f, 0.0f, 1.0f);  // RED
+            _glClear(GL_COLOR_BUFFER_BIT);  // 只清 color，不清 depth！
+
+            _glEnable(GL_DEPTH_TEST);
+            _glDepthFunc(GL_LESS);
+
+            // 绘制全屏 quad at Z=0.5，shader 输出黑色（绑定空纹理→texture2D返回0）
+            float diagVerts[] = { -1,-1,0.5f, 1,-1,0.5f, -1,1,0.5f, 1,1,0.5f };
+            _glUseProgram(gDepthToColorProgram);
+            _glActiveTexture(GL_TEXTURE0);
+            _glBindTexture(GL_TEXTURE_2D, 0);  // 空纹理 → shader 输出黑色
+            _glUniform1i(_glGetUniformLocation(gDepthToColorProgram, "u_depthTexture"), 0);
+            GLint diagPosLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
+            GLint diagTexLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+            _glVertexAttribPointer(diagPosLoc, 3, GL_FLOAT, GL_FALSE, 0, diagVerts);
+            _glEnableVertexAttribArray(diagPosLoc);
+            if (diagTexLoc >= 0) _glDisableVertexAttribArray(diagTexLoc);
+            _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            _glDisable(GL_DEPTH_TEST);
+
+            // Step 3: 读回多个像素点判断深度数据
+            GLubyte dpCenter[4] = {0}, dpLeft[4] = {0}, dpRight[4] = {0};
+            _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, dpCenter);
+            _glReadPixels(width/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, dpLeft);
+            _glReadPixels(width*3/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, dpRight);
+            DBG_LOG("DIAG depth-test: center R=%d G=%d B=%d  left R=%d G=%d B=%d  right R=%d G=%d B=%d",
+                    dpCenter[0], dpCenter[1], dpCenter[2],
+                    dpLeft[0], dpLeft[1], dpLeft[2],
+                    dpRight[0], dpRight[1], dpRight[2]);
+            // RED(255,0,0) = depth < 0.5 (近处), BLACK(0,0,0) = depth >= 0.5 (远处)
+            // 如果有混合 → 深度数据存在，根因是 GPU 不支持深度纹理采样
+            // 如果全相同 → 深度数据可能为空/均匀
+            bool diagHasData = (dpCenter[0] != dpLeft[0] || dpCenter[0] != dpRight[0] ||
+                                dpCenter[0] == 255 || dpCenter[0] == 0);
+            DBG_LOG("DIAG depth-test: data_exists=%s (mixed=%s)",
+                    diagHasData ? "LIKELY" : "UNCERTAIN",
+                    (dpCenter[0] != dpLeft[0] || dpCenter[0] != dpRight[0]) ? "YES" : "NO");
+            while (_glGetError() != GL_NO_ERROR) {}
+        } else {
+            DBG_LOG("DIAG depth-test: EnsureTempDepthResources failed, skipping diagnostic");
+        }
+    }
+
     bool depthReadOk = false;
     float vertices[] = { -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0 };
     float texCoords[] = { 0, 0,  1, 0,  0, 1,  1, 1 };
