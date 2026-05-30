@@ -28,6 +28,7 @@ GLuint gDepthBlitFBO = 0;
 GLuint gDepthBlitColorTex = 0;
 GLuint gSideBySideProgram = 0;
 GLuint gDepthToColorProgram = 0;
+GLuint gDepthTestVisProgram = 0;  // N-pass depth test visualization shader
 GLboolean gOverlayInitDone = GL_FALSE;
 
 // Cached temp resources for depth blit (avoid per-frame alloc/dealloc)
@@ -91,9 +92,26 @@ void main() {
     if (v_texCoord.x < 0.5) {
         gl_FragColor = texture2D(u_colorTexture, vec2(v_texCoord.x * 2.0, v_texCoord.y));
     } else {
-        gl_FragColor = texture2D(u_depthPseudocolorTexture, 
+        gl_FragColor = texture2D(u_depthPseudocolorTexture,
                                  vec2((v_texCoord.x - 0.5) * 2.0, v_texCoord.y));
     }
+}
+)";
+
+// N-pass depth test shader: outputs fixed brightness, no texture sampling needed.
+// Used with GPU hardware depth test to convert depth buffer to grayscale.
+static const char* DEPTH_TEST_VIS_VERTEX_SHADER = R"(
+attribute vec4 a_position;
+void main() {
+    gl_Position = a_position;
+}
+)";
+
+static const char* DEPTH_TEST_VIS_FRAGMENT_SHADER = R"(
+precision mediump float;
+uniform float u_brightness;
+void main() {
+    gl_FragColor = vec4(u_brightness, u_brightness, u_brightness, 1.0);
 }
 )";
 
@@ -303,6 +321,33 @@ void InitDepthOverlay(int width, int height) {
     _glDeleteShader(vertShader2);
     _glDeleteShader(fragShader2);
     DBG_LOG("Depth overlay: sideBySideProgram=%d", gSideBySideProgram);
+
+    DBG_LOG("Depth overlay: compiling depth test visualization shader");
+    GLuint vertShader3 = compile_shader(GL_VERTEX_SHADER, DEPTH_TEST_VIS_VERTEX_SHADER);
+    GLuint fragShader3 = compile_shader(GL_FRAGMENT_SHADER, DEPTH_TEST_VIS_FRAGMENT_SHADER);
+    gDepthTestVisProgram = _glCreateProgram();
+    _glAttachShader(gDepthTestVisProgram, vertShader3);
+    _glAttachShader(gDepthTestVisProgram, fragShader3);
+    _glLinkProgram(gDepthTestVisProgram);
+
+    GLint linkStatus3 = 0;
+    _glGetProgramiv(gDepthTestVisProgram, GL_LINK_STATUS, &linkStatus3);
+    if (linkStatus3 == GL_FALSE) {
+        GLint infoLen3 = 0;
+        _glGetProgramiv(gDepthTestVisProgram, GL_INFO_LOG_LENGTH, &infoLen3);
+        if (infoLen3 > 1) {
+            char* infoLog3 = new char[infoLen3];
+            _glGetProgramInfoLog(gDepthTestVisProgram, infoLen3, NULL, infoLog3);
+            DBG_LOG("Depth overlay: depth test vis program link error: %s", infoLog3);
+            delete[] infoLog3;
+        }
+    } else {
+        DBG_LOG("Depth overlay: depth test vis program linked successfully");
+    }
+
+    _glDeleteShader(vertShader3);
+    _glDeleteShader(fragShader3);
+    DBG_LOG("Depth overlay: depthTestVisProgram=%d", gDepthTestVisProgram);
     
     _glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
@@ -574,84 +619,34 @@ void RenderDepthOverlay(int width, int height) {
     float vertices[] = { -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0 };
     float texCoords[] = { 0, 0,  1, 0,  0, 1,  1, 1 };
 
-    // === Method 1: Shader sampling of depth texture (most GPU-friendly) ===
-    // After _glFinish(), the depth texture should be populated.
-    if (depthAttachmentType == GL_TEXTURE && depthAttachmentId != 0) {
-        DBG_LOG("Depth overlay: trying shader sampling of depth texture id=%d", depthAttachmentId);
+    // === 使用在 glBlitFramebuffer hook 中捕获的深度数据 ===
+    // 深度数据在游戏帧渲染期间被捕获（此时 tile-based GPU 的深度还在 on-chip 中）。
+    // gCapturedDepthFBO 包含捕获的深度纹理。
+    if (gDepthCapturedThisFrame && gCapturedDepthFBO != 0) {
+        DBG_LOG("Depth overlay: using captured depth capFBO=%d %dx%d",
+                gCapturedDepthFBO, gCapturedDepthWidth, gCapturedDepthHeight);
 
-        // Override texture parameters to ensure sampling works
-        _glBindTexture(GL_TEXTURE_2D, depthAttachmentId);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        while (_glGetError() != GL_NO_ERROR) {}
+        // 获取捕获 FBO 的深度纹理 ID
+        _glBindFramebuffer(GL_FRAMEBUFFER, gCapturedDepthFBO);
+        GLint capDepthType = GL_NONE, capDepthId = 0;
+        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &capDepthType);
+        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &capDepthId);
+        DBG_LOG("Depth overlay: capFBO depth(type=0x%x, id=%d)", capDepthType, capDepthId);
 
-        _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
-        _glViewport(0, 0, width, height);
-        {
-            GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-            _glDrawBuffers(1, drawBuffers);
-        }
-        _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        _glClear(GL_COLOR_BUFFER_BIT);
-        _glDisable(GL_DEPTH_TEST);
-        while (_glGetError() != GL_NO_ERROR) {}
+        if (capDepthType == GL_TEXTURE && capDepthId > 0) {
+            // === Plan A: Shader 采样捕获的深度纹理 ===
+            _glBindTexture(GL_TEXTURE_2D, capDepthId);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            while (_glGetError() != GL_NO_ERROR) {}
 
-        _glUseProgram(gDepthToColorProgram);
-        _glActiveTexture(GL_TEXTURE0);
-        _glBindTexture(GL_TEXTURE_2D, depthAttachmentId);
-        GLint depthTexLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
-        _glUniform1i(depthTexLoc, 0);
-        GLint posLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
-        GLint texLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
-
-        _glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-        _glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-        _glEnableVertexAttribArray(posLoc);
-        _glEnableVertexAttribArray(texLoc);
-        _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        GLenum drawErr = _glGetError();
-        DBG_LOG("Depth overlay: shader draw err=0x%x, texLoc=%d, posLoc=%d, texLoc=%d",
-                drawErr, depthTexLoc, posLoc, texLoc);
-
-        // Verify output
-        GLubyte pixel[4] = {0, 0, 0, 0};
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
-        _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-        DBG_LOG("DIAG shader after flush: gDepthBlitFBO center R=%d G=%d B=%d A=%d",
-                pixel[0], pixel[1], pixel[2], pixel[3]);
-
-        if (pixel[0] > 0 || pixel[1] > 0 || pixel[2] > 0) {
-            depthReadOk = true;
-            DBG_LOG("Depth overlay: shader sampling SUCCESS after _glFlush!");
-        } else {
-            DBG_LOG("Depth overlay: shader sampling still returns 0 after _glFinish");
-        }
-        while (_glGetError() != GL_NO_ERROR) {}
-    }
-
-    // === Method 2: glBlitFramebuffer (the game itself uses this successfully!) ===
-    // On this device, glReadPixels for depth always fails with GL_INVALID_ENUM,
-    // but glBlitFramebuffer(GL_DEPTH_BUFFER_BIT) succeeds (err=0x0).
-    // So we blit depth to our temp texture, then use shader to convert depth→color.
-    if (!depthReadOk && EnsureTempDepthResources(width, height)) {
-        DBG_LOG("Depth overlay: trying glBlitFramebuffer depth blit");
-        while (_glGetError() != GL_NO_ERROR) {}
-
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFBO);
-        _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gTempDepthFBO);
-        _glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        GLenum blitErr = _glGetError();
-        DBG_LOG("Depth overlay: depth blit err=0x%x", blitErr);
-
-        if (blitErr == GL_NO_ERROR) {
-            // Blit succeeded! Skip glReadPixels verification (not supported on this device).
-            // Directly use shader to sample gTempDepthTex and convert to color.
             _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
-            _glViewport(0, 0, width, height);
+            _glViewport(0, 0, gCapturedDepthWidth, gCapturedDepthHeight);
             {
                 GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
                 _glDrawBuffers(1, drawBuffers);
@@ -661,46 +656,129 @@ void RenderDepthOverlay(int width, int height) {
             _glDisable(GL_DEPTH_TEST);
             while (_glGetError() != GL_NO_ERROR) {}
 
-            // Make sure gTempDepthTex has correct sampling params
-            _glBindTexture(GL_TEXTURE_2D, gTempDepthTex);
-            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
             _glUseProgram(gDepthToColorProgram);
             _glActiveTexture(GL_TEXTURE0);
-            _glBindTexture(GL_TEXTURE_2D, gTempDepthTex);
-            GLint dLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
-            _glUniform1i(dLoc, 0);
-            GLint pLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
-            GLint tLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
-            _glVertexAttribPointer(pLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-            _glVertexAttribPointer(tLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-            _glEnableVertexAttribArray(pLoc);
-            _glEnableVertexAttribArray(tLoc);
+            _glBindTexture(GL_TEXTURE_2D, capDepthId);
+            GLint depthTexLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
+            _glUniform1i(depthTexLoc, 0);
+            GLint posLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
+            GLint texLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+
+            _glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+            _glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+            _glEnableVertexAttribArray(posLoc);
+            _glEnableVertexAttribArray(texLoc);
             _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
             GLenum shaderErr = _glGetError();
-            DBG_LOG("Depth overlay: blit+shader draw err=0x%x, dLoc=%d, pLoc=%d, tLoc=%d",
-                    shaderErr, dLoc, pLoc, tLoc);
+            DBG_LOG("Depth overlay: captured shader draw err=0x%x", shaderErr);
 
-            // Verify shader output via COLOR glReadPixels (this works on this device!)
-            GLubyte bpixel[4] = {0, 0, 0, 0};
+            // 验证 shader 输出
+            GLubyte pixel[4] = {0};
             _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
-            _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, bpixel);
-            DBG_LOG("DIAG blit+shader: gDepthBlitFBO center R=%d G=%d B=%d A=%d",
-                    bpixel[0], bpixel[1], bpixel[2], bpixel[3]);
+            _glReadPixels(gCapturedDepthWidth/2, gCapturedDepthHeight/2, 1, 1,
+                          GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+            DBG_LOG("DIAG captured shader: gDepthBlitFBO center R=%d G=%d B=%d A=%d",
+                    pixel[0], pixel[1], pixel[2], pixel[3]);
 
-            if (bpixel[0] > 0 || bpixel[1] > 0 || bpixel[2] > 0) {
+            if (pixel[0] > 0 || pixel[1] > 0 || pixel[2] > 0) {
                 depthReadOk = true;
-                DBG_LOG("Depth overlay: blit+shader SUCCESS!");
+                DBG_LOG("Depth overlay: captured depth shader sampling SUCCESS!");
             } else {
-                DBG_LOG("Depth overlay: blit succeeded but shader output is still 0");
+                DBG_LOG("Depth overlay: captured depth shader returned 0, trying N-pass depth test");
+            }
+            while (_glGetError() != GL_NO_ERROR) {}
+
+            // === Plan B: N-pass 深度测试（GPU 硬件保证工作） ===
+            // 如果 shader 采样失败（GLES 3.0 sampler2D 采样 DEPTH24_STENCIL8 可能 undefined），
+            // 用 GPU 固定管线的深度测试将深度缓冲转换为灰度图。
+            if (!depthReadOk && EnsureTempDepthResources(gCapturedDepthWidth, gCapturedDepthHeight)) {
+                // 将捕获的深度纹理附加到临时 FBO 作为 depth，用临时 color 输出灰度
+                _glBindFramebuffer(GL_FRAMEBUFFER, gTempDepthFBO);
+                _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                    GL_TEXTURE_2D, capDepthId, 0);
+
+                GLenum status = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
+                DBG_LOG("Depth overlay: N-pass temp FBO status=0x%x", status);
+
+                if (status == GL_FRAMEBUFFER_COMPLETE) {
+                    _glViewport(0, 0, gCapturedDepthWidth, gCapturedDepthHeight);
+                    {
+                        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+                        _glDrawBuffers(1, drawBuffers);
+                    }
+                    // 只清 color，不清 depth（保留捕获的深度数据）
+                    _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    _glClear(GL_COLOR_BUFFER_BIT);
+
+                    _glEnable(GL_DEPTH_TEST);
+                    _glDepthFunc(GL_LESS);
+                    _glEnable(GL_BLEND);
+                    _glBlendFunc(GL_ONE, GL_ONE);  // additive blending
+                    _glDepthMask(GL_FALSE);  // 不写入深度，只读取
+
+                    _glUseProgram(gDepthTestVisProgram);
+                    GLint brightnessLoc = _glGetUniformLocation(gDepthTestVisProgram, "u_brightness");
+                    GLint npassPosLoc = _glGetAttribLocation(gDepthTestVisProgram, "a_position");
+
+                    _glEnableVertexAttribArray(npassPosLoc);
+
+                    // N 次循环：每次在不同 NDC Z 阈值绘制白色 quad
+                    // GL_LESS: fragment_z < stored_depth → 通过 → 输出亮度
+                    // 累加结果：亮度正比于 depth 值
+                    const int N = 16;
+                    const float brightness = 1.0f / N;
+                    _glUniform1f(brightnessLoc, brightness);
+
+                    for (int i = 0; i < N; i++) {
+                        // NDC Z 从 -1 到 +1 均匀分布（对应 depth 0.0 到 1.0）
+                        float ndcZ = -1.0f + 2.0f * (i + 1) / (N + 1);
+                        float zv[] = { -1,-1,ndcZ, 1,-1,ndcZ, -1,1,ndcZ, 1,1,ndcZ };
+                        _glVertexAttribPointer(npassPosLoc, 3, GL_FLOAT, GL_FALSE, 0, zv);
+                        _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                    }
+
+                    _glDisable(GL_DEPTH_TEST);
+                    _glDisable(GL_BLEND);
+                    _glDepthMask(GL_TRUE);
+
+                    // 验证 N-pass 输出
+                    GLubyte npixel[4] = {0};
+                    _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
+                    _glReadPixels(gCapturedDepthWidth/2, gCapturedDepthHeight/2, 1, 1,
+                                  GL_RGBA, GL_UNSIGNED_BYTE, npixel);
+                    DBG_LOG("DIAG N-pass: tempFBO center R=%d G=%d B=%d A=%d",
+                            npixel[0], npixel[1], npixel[2], npixel[3]);
+
+                    if (npixel[0] > 0 || npixel[1] > 0 || npixel[2] > 0) {
+                        // N-pass 成功！把结果 blit 到 gDepthBlitFBO
+                        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
+                        _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gDepthBlitFBO);
+                        _glBlitFramebuffer(0, 0, gCapturedDepthWidth, gCapturedDepthHeight,
+                                           0, 0, gCapturedDepthWidth, gCapturedDepthHeight,
+                                           GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                        depthReadOk = true;
+                        DBG_LOG("Depth overlay: N-pass depth test SUCCESS!");
+                    } else {
+                        DBG_LOG("Depth overlay: N-pass output is also 0 (depth data may be empty)");
+                    }
+                } else {
+                    DBG_LOG("Depth overlay: N-pass temp FBO incomplete, cannot proceed");
+                }
+
+                // 恢复 gTempDepthFBO 原来的 depth attachment
+                _glBindFramebuffer(GL_FRAMEBUFFER, gTempDepthFBO);
+                _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                    GL_TEXTURE_2D, gTempDepthTex, 0);
+                while (_glGetError() != GL_NO_ERROR) {}
             }
         }
-        while (_glGetError() != GL_NO_ERROR) {}
+    } else {
+        if (!gDepthCapturedThisFrame) {
+            DBG_LOG("Depth overlay: no captured depth this frame");
+        } else {
+            DBG_LOG("Depth overlay: captured FBO is 0");
+        }
     }
 
     if (!depthReadOk) {
@@ -829,15 +907,16 @@ void RenderDepthOverlay(int width, int height) {
 }
 
 void CleanupDepthOverlay() {
-    DBG_LOG("Depth overlay: CleanupDepthOverlay, FBO=(%d,%d), Tex=(%d,%d), Progs=(%d,%d)",
+    DBG_LOG("Depth overlay: CleanupDepthOverlay, FBO=(%d,%d), Tex=(%d,%d), Progs=(%d,%d,%d)",
             gOverlayFBO, gDepthBlitFBO, gOverlayColorTex, gDepthBlitColorTex,
-            gSideBySideProgram, gDepthToColorProgram);
+            gSideBySideProgram, gDepthToColorProgram, gDepthTestVisProgram);
     if (gOverlayFBO) { _glDeleteFramebuffers(1, &gOverlayFBO); gOverlayFBO = 0; }
     if (gOverlayColorTex) { _glDeleteTextures(1, &gOverlayColorTex); gOverlayColorTex = 0; }
     if (gDepthBlitFBO) { _glDeleteFramebuffers(1, &gDepthBlitFBO); gDepthBlitFBO = 0; }
     if (gDepthBlitColorTex) { _glDeleteTextures(1, &gDepthBlitColorTex); gDepthBlitColorTex = 0; }
     if (gSideBySideProgram) { _glDeleteProgram(gSideBySideProgram); gSideBySideProgram = 0; }
     if (gDepthToColorProgram) { _glDeleteProgram(gDepthToColorProgram); gDepthToColorProgram = 0; }
+    if (gDepthTestVisProgram) { _glDeleteProgram(gDepthTestVisProgram); gDepthTestVisProgram = 0; }
     CleanupTempDepthResources();
     gOverlayInitDone = GL_FALSE;
     gOverlayWidth = 0;
