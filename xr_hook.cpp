@@ -1,15 +1,6 @@
 #include "overlap.hpp"
 #include <unordered_map>
 
-  GLuint gCapturedDepthFBO = 0;
-  int gCapturedDepthWidth = 0;
-  int gCapturedDepthHeight = 0;
-  bool gDepthCapturedThisFrame = false;
-
-  static GLuint sCapFBO = 0;
-  static GLuint sCapDepthTex = 0;
-  static int sCapW = 0, sCapH = 0;
-
 // Draw call tracking for depth buffer selection heuristic
 struct FBOStats {
     uint32_t draw_calls = 0;
@@ -161,6 +152,7 @@ EGLBoolean GLES_CALLCONVENTION patrace_eglSwapBuffers(EGLDisplay dpy, EGLSurface
         g_fbo_draw_stats.clear();
     }
 
+    gOverlayFrameId = g_frame_id;
     UpdateDepthOverlay(width, height);
 
     // for debugging
@@ -380,112 +372,3 @@ void GLES_CALLCONVENTION patrace_glDrawElements(GLenum mode, GLsizei count, GLen
     // traceFunctionBody_after
     after_glDraw();
 }
-
-
-  void GLES_CALLCONVENTION patrace_glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1,
-  GLbitfield mask, GLenum filter){
-      GLint depthSrcFBO = 0;
-      if (mask & GL_DEPTH_BUFFER_BIT) {
-          _glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &depthSrcFBO);
-          gLastDepthBlitTargetFBO = (GLuint)depthSrcFBO;
-          DBG_LOG("Depth overlay: g_frame_id:%d detected depth blit from FBO=%d, mask=0x%x filter=%x",g_frame_id, depthSrcFBO, mask, filter);
-      }
-
-      unsigned char tid = GetThreadId();
-      UpdateTimesEGLConfigUsed(tid);
-      if (gTraceThread[tid].mCallDepth)
-      {
-          ++gTraceThread[tid].mCallDepth;
-          _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
-          --gTraceThread[tid].mCallDepth;
-          return;
-      }
-      DUMP_PER_API("Invoking: _glBlitFramebuffer(%x, %x, %x, %x, %x, %x, %x, %x, %x, %x)\n", srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask,
-  filter);
-
-      ++gTraceThread[tid].mCallDepth;
-      _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
-      --gTraceThread[tid].mCallDepth;
-
-      // === NEW: Capture depth while data still exists in GPU memory ===
-      // After the game's depth blit completes, the GPU has resolved the source FBO's
-      // tile buffer and depth data is in the texture. Blit it to our capture FBO now.
-      if ((mask & GL_DEPTH_BUFFER_BIT) && depthSrcFBO != 0 && !gDepthCapturedThisFrame) {
-          int w = srcX1 - srcX0;
-          int h = srcY1 - srcY0;
-          if (w > 0 && h > 0) {
-              // Create/update capture FBO if size changed
-              if (sCapFBO == 0 || sCapW != w || sCapH != h) {
-                  if (sCapFBO) _glDeleteFramebuffers(1, &sCapFBO);
-                  if (sCapDepthTex) _glDeleteTextures(1, &sCapDepthTex);
-                  _glGenFramebuffers(1, &sCapFBO);
-                  _glGenTextures(1, &sCapDepthTex);
-                  _glBindTexture(GL_TEXTURE_2D, sCapDepthTex);
-                  _glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, w, h);
-                  _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                  _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                  _glBindFramebuffer(GL_FRAMEBUFFER, sCapFBO);
-                  _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                          GL_TEXTURE_2D, sCapDepthTex, 0);
-                  GLenum capStatus = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
-                  DBG_LOG("Depth capture: created FBO=%d tex=%d %dx%d status=0x%x",
-                          sCapFBO, sCapDepthTex, w, h, capStatus);
-                  sCapW = w;
-                  sCapH = h;
-              }
-
-              // Save bindings
-              GLint savedRead = 0, savedDraw = 0;
-              _glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &savedRead);
-              _glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &savedDraw);
-
-              // Blit depth to capture FBO
-              _glBindFramebuffer(GL_READ_FRAMEBUFFER, depthSrcFBO);
-              _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sCapFBO);
-              while (_glGetError() != GL_NO_ERROR) {}
-              _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, 0, 0, w, h,
-                                 GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-              GLenum capErr = _glGetError();
-
-              // Restore bindings
-              _glBindFramebuffer(GL_READ_FRAMEBUFFER, savedRead);
-              _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, savedDraw);
-
-              gCapturedDepthFBO = sCapFBO;
-              gCapturedDepthWidth = w;
-              gCapturedDepthHeight = h;
-              gDepthCapturedThisFrame = true;
-              DBG_LOG("Depth capture: captured from FBO=%d -> capFBO=%d err=0x%x %dx%d",
-                      depthSrcFBO, sCapFBO, capErr, w, h);
-          }
-      }
-
-      // save parameters (unchanged)
-      gTraceOut->callMutex.lock();
-      char* dest = gTraceOut->writebuf;
-      BCall *pCall = (BCall*)dest;
-      pCall->funcId = glBlitFramebuffer_id;
-  #ifdef DEBUG
-      if (pCall->funcId > common::ApiInfo::MaxSigId)
-      {
-          DBG_LOG("Fatal error: Trying to write bad func ID for glBlitFramebuffer!\n");
-          abort();
-      }
-  #endif
-      pCall->tid = tid; pCall->reserved = 0;
-      dest += sizeof(*pCall);
-      dest = WriteFixed<int>(dest, srcX0);
-      dest = WriteFixed<int>(dest, srcY0);
-      dest = WriteFixed<int>(dest, srcX1);
-      dest = WriteFixed<int>(dest, srcY1);
-      dest = WriteFixed<int>(dest, dstX0);
-      dest = WriteFixed<int>(dest, dstY0);
-      dest = WriteFixed<int>(dest, dstX1);
-      dest = WriteFixed<int>(dest, dstY1);
-      dest = WriteFixed<unsigned int>(dest, mask);
-      dest = WriteFixed<int>(dest, filter);
-      pCall->errNo = GetCallErrorNo("glBlitFramebuffer", tid);
-      SendBufForNormalApi(pCall, dest, &gTraceOut->curparambuf, sizeof(*pCall));
-      gTraceOut->callNo++;
-      gTraceOut->callMutex.unlock();
-  }
