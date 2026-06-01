@@ -6,15 +6,11 @@
 #include <chrono>
 #include <GLES3/gl3.h>
 
+// DBG_LOG is defined by the build system (see build config).
+// Format: DBG_LOG(format, ...) → os::log("%s,%d: %s" format, SHORT_FILE, __LINE__, ...)
+
 #define DEPTH_OVERLAY_TRIGGER_FILE "/data/storage/el2/base/haps/inputs/results/depth_overlay"
 #define DEPTH_OVERLAY_STABLE_FRAME_THRESHOLD 30
-
-// Debug logging macro — override in your build if needed
-#ifndef DBG_LOG
-#include <android/log.h>
-#define DBG_LOG(fmt, ...) \
-    __android_log_print(ANDROID_LOG_DEBUG, "DepthOverlay", fmt, ##__VA_ARGS__)
-#endif
 
 // Enabled state
 extern bool gDepthOverlayEnabled;
