@@ -1,643 +1,359 @@
 #include "depth_overlay.hpp"
-#include <GLES3/gl3.h>
 #include <dispatch/eglproc_auto.hpp>
 
-#define DO_CHECK_GL_ERROR(msg) do { \
-    GLenum err = _glGetError(); \
-    if (err != GL_NO_ERROR) { \
-        DBG_LOG("Depth overlay GL ERROR at %s: 0x%x", msg, err); \
-    } \
+// ====================================================================
+// Unified logging — grep "[DOV]" to find ALL depth overlay logs
+// Frame ID set by hook.cpp before UpdateDepthOverlay().
+// For tcp_egltrace_auto.cpp capture logs, use:
+//   DBG_LOG("[DOV][F%d] ...", g_frame_id, ...);
+// ====================================================================
+
+int gOverlayFrameId = 0;
+
+#define DOV_LOG(fmt, ...) \
+    DBG_LOG("[DOV][F%d] " fmt, gOverlayFrameId, ##__VA_ARGS__)
+
+#ifdef DEPTH_OVERLAY_DEBUG
+#define DOV_DIAG(fmt, ...) DOV_LOG("[DIAG] " fmt, ##__VA_ARGS__)
+#else
+#define DOV_DIAG(fmt, ...) ((void)0)
+#endif
+
+// ====================================================================
+// GL error / FBO status macros
+// ====================================================================
+
+#define DO_CHECK_GL(msg) do { \
+    GLenum _e = _glGetError(); \
+    if (_e != GL_NO_ERROR) DOV_LOG("GL ERROR %s: 0x%x", msg, _e); \
 } while(0)
 
-#define CHECK_FBO_STATUS(fbo, name) do { \
-    GLenum status = _glCheckFramebufferStatus(GL_FRAMEBUFFER); \
-    if (status != GL_FRAMEBUFFER_COMPLETE) { \
-        DBG_LOG("Depth overlay: FBO %s (%d) incomplete, status=0x%x", name, fbo, status); \
-    } else { \
-        DBG_LOG("Depth overlay: FBO %s (%d) complete", name, fbo); \
-    } \
+#define CHECK_FBO(fbo, name) do { \
+    GLenum _s = _glCheckFramebufferStatus(GL_FRAMEBUFFER); \
+    if (_s != GL_FRAMEBUFFER_COMPLETE) \
+        DOV_LOG("FBO %s(%d) incomplete: 0x%x", name, fbo, _s); \
 } while(0)
 
-// bool gDepthOverlayEnabled = false;
+// ====================================================================
+// Globals
+// ====================================================================
+
 bool gDepthOverlayEnabled = true;
 std::atomic<bool> gOverlayTogglePending{false};
+std::mutex gOverlayMutex;
 
 GLuint gOverlayFBO = 0;
 GLuint gOverlayColorTex = 0;
 GLuint gDepthBlitFBO = 0;
 GLuint gDepthBlitColorTex = 0;
-GLuint gSideBySideProgram = 0;
 GLuint gDepthToColorProgram = 0;
-GLuint gDepthTestVisProgram = 0;  // N-pass depth test visualization shader
+GLuint gDepthTestVisProgram = 0;
 GLboolean gOverlayInitDone = GL_FALSE;
+GLuint gLastDepthBlitTargetFBO = 0;
 
-// Cached temp resources for depth blit (avoid per-frame alloc/dealloc)
-static GLuint gTempDepthFBO = 0;
-static GLuint gTempDepthTex = 0;
-static GLuint gTempDummyColorTex = 0;
-static int gTempDepthWidth = 0;
-static int gTempDepthHeight = 0;
 int gOverlayWidth = 0;
 int gOverlayHeight = 0;
-std::mutex gOverlayMutex;
-GLuint gLastDepthBlitTargetFBO = 0;
+
+// Temp resources for N-pass depth visualization
+static GLuint gTempFBO = 0;
+static GLuint gTempDepthTex = 0;
+static GLuint gTempColorTex = 0;
+static int gTempW = 0, gTempH = 0;
 
 int gStableFrameCount = 0;
 int gLastStableWidth = 0;
 int gLastStableHeight = 0;
 bool gDepthAvailableReported = false;
 
-std::chrono::time_point<std::chrono::high_resolution_clock> gLastFrameTime;
 float gFrameTimeMs = 0.0f;
 int gFrameCount = 0;
 
-static const char* DEPTH_TO_COLOR_VERTEX_SHADER = R"(
+// Capture globals (written by glBlitFramebuffer hook, read here)
+GLuint gCapturedDepthFBO = 0;
+int gCapturedDepthWidth = 0;
+int gCapturedDepthHeight = 0;
+bool gDepthCapturedThisFrame = false;
+
+// ====================================================================
+// Shader sources
+// ====================================================================
+
+// Samples a depth texture and outputs grayscale
+static const char* DEPTH_TO_COLOR_VS = R"(
 attribute vec4 a_position;
 attribute vec2 a_texCoord;
 varying vec2 v_texCoord;
 void main() {
     gl_Position = a_position;
     v_texCoord = a_texCoord;
-}
-)";
+})";
 
-static const char* DEPTH_TO_COLOR_FRAGMENT_SHADER = R"(
+static const char* DEPTH_TO_COLOR_FS = R"(
 precision mediump float;
 uniform sampler2D u_depthTexture;
 varying vec2 v_texCoord;
-
 void main() {
-    float depth = texture2D(u_depthTexture, v_texCoord).r;
-    gl_FragColor = vec4(depth, depth, depth, 1.0);
-}
-)";
+    float d = texture2D(u_depthTexture, v_texCoord).r;
+    gl_FragColor = vec4(d, d, d, 1.0);
+})";
 
-static const char* SIDE_BY_SIDE_VERTEX_SHADER = R"(
-attribute vec4 a_position;
-attribute vec2 a_texCoord;
-varying vec2 v_texCoord;
-void main() {
-    gl_Position = a_position;
-    v_texCoord = a_texCoord;
-}
-)";
-
-static const char* SIDE_BY_SIDE_FRAGMENT_SHADER = R"(
-precision mediump float;
-uniform sampler2D u_colorTexture;
-uniform sampler2D u_depthPseudocolorTexture;
-varying vec2 v_texCoord;
-
-void main() {
-    if (v_texCoord.x < 0.5) {
-        gl_FragColor = texture2D(u_colorTexture, vec2(v_texCoord.x * 2.0, v_texCoord.y));
-    } else {
-        gl_FragColor = texture2D(u_depthPseudocolorTexture,
-                                 vec2((v_texCoord.x - 0.5) * 2.0, v_texCoord.y));
-    }
-}
-)";
-
-// N-pass depth test shader: outputs fixed brightness, no texture sampling needed.
-// Used with GPU hardware depth test to convert depth buffer to grayscale.
-static const char* DEPTH_TEST_VIS_VERTEX_SHADER = R"(
+// Outputs fixed brightness — used with GPU hardware depth test (N-pass)
+static const char* DEPTH_TEST_VIS_VS = R"(
 attribute vec4 a_position;
 void main() {
     gl_Position = a_position;
-}
-)";
+})";
 
-static const char* DEPTH_TEST_VIS_FRAGMENT_SHADER = R"(
+static const char* DEPTH_TEST_VIS_FS = R"(
 precision mediump float;
 uniform float u_brightness;
 void main() {
     gl_FragColor = vec4(u_brightness, u_brightness, u_brightness, 1.0);
-}
-)";
+})";
 
-static bool isDepthOverlayTriggered() {
-    // bool triggered = (access(DEPTH_OVERLAY_TRIGGER_FILE, F_OK) == 0);
-    bool triggered = true;
-    DBG_LOG("Depth overlay: trigger file check result=%d, path=%s", triggered ? 1 : 0, DEPTH_OVERLAY_TRIGGER_FILE);
-    return triggered;
-}
+// ====================================================================
+// Shader helpers
+// ====================================================================
 
-static GLuint compile_shader(GLenum type, const char* shaderSrc) {
-    GLuint shader = _glCreateShader(type);
-    _glShaderSource(shader, 1, &shaderSrc, NULL);
-    _glCompileShader(shader);
-    
-    GLint compiled = 0;
-    _glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if (!compiled) {
-        GLint infoLen = 0;
-        _glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-        if (infoLen > 1) {
-            char* infoLog = new char[infoLen];
-            _glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-            DBG_LOG("Depth overlay: shader compile error: %s", infoLog);
-            delete[] infoLog;
+static GLuint compile_shader(GLenum type, const char* src) {
+    GLuint s = _glCreateShader(type);
+    if (!s) return 0;
+    _glShaderSource(s, 1, &src, NULL);
+    _glCompileShader(s);
+    GLint ok = 0;
+    _glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
+    if (!ok) {
+        GLint len = 0;
+        _glGetShaderiv(s, GL_INFO_LOG_LENGTH, &len);
+        if (len > 1) {
+            char* log = new char[len];
+            _glGetShaderInfoLog(s, len, NULL, log);
+            DOV_LOG("shader compile fail(0x%x): %s", type, log);
+            delete[] log;
         }
-    } else {
-        DBG_LOG("Depth overlay: shader compiled successfully, type=0x%x", type);
+        _glDeleteShader(s);
+        return 0;
     }
-    return shader;
+    return s;
 }
 
-// Ensure cached temp depth blit resources exist and match dimensions.
-// Returns true if resources are ready, false on error.
-static bool EnsureTempDepthResources(int width, int height) {
-    if (gTempDepthFBO != 0 && gTempDepthWidth == width && gTempDepthHeight == height) {
-        return true; // Already cached with matching size
+static GLuint link_program(GLuint vs, GLuint fs) {
+    GLuint p = _glCreateProgram();
+    if (!p) return 0;
+    _glAttachShader(p, vs);
+    _glAttachShader(p, fs);
+    _glLinkProgram(p);
+    GLint ok = 0;
+    _glGetProgramiv(p, GL_LINK_STATUS, &ok);
+    if (!ok) {
+        GLint len = 0;
+        _glGetProgramiv(p, GL_INFO_LOG_LENGTH, &len);
+        if (len > 1) {
+            char* log = new char[len];
+            _glGetProgramInfoLog(p, len, NULL, log);
+            DOV_LOG("program link fail: %s", log);
+            delete[] log;
+        }
     }
+    // Shaders can be detached+deleted after link
+    _glDetachShader(p, vs);
+    _glDetachShader(p, fs);
+    _glDeleteShader(vs);
+    _glDeleteShader(fs);
+    return p;
+}
 
-    // Clean up old resources if dimensions changed
-    if (gTempDepthFBO != 0) {
-        _glDeleteFramebuffers(1, &gTempDepthFBO);
-        gTempDepthFBO = 0;
-    }
-    if (gTempDepthTex != 0) {
-        _glDeleteTextures(1, &gTempDepthTex);
-        gTempDepthTex = 0;
-    }
-    if (gTempDummyColorTex != 0) {
-        _glDeleteTextures(1, &gTempDummyColorTex);
-        gTempDummyColorTex = 0;
-    }
+// ====================================================================
+// Temp resource management (for N-pass depth visualization)
+// ====================================================================
 
-    _glGenFramebuffers(1, &gTempDepthFBO);
+static bool EnsureTempResources(int w, int h) {
+    if (gTempFBO != 0 && gTempW == w && gTempH == h)
+        return true;
+
+    if (gTempFBO) _glDeleteFramebuffers(1, &gTempFBO);
+    if (gTempDepthTex) _glDeleteTextures(1, &gTempDepthTex);
+    if (gTempColorTex) _glDeleteTextures(1, &gTempColorTex);
+
+    _glGenFramebuffers(1, &gTempFBO);
     _glGenTextures(1, &gTempDepthTex);
-    _glGenTextures(1, &gTempDummyColorTex);
+    _glGenTextures(1, &gTempColorTex);
 
-    // Setup depth texture
     _glBindTexture(GL_TEXTURE_2D, gTempDepthTex);
-    _glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, width, height);
+    _glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, w, h);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 
-    // Setup dummy color texture
-    _glBindTexture(GL_TEXTURE_2D, gTempDummyColorTex);
-    _glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+    _glBindTexture(GL_TEXTURE_2D, gTempColorTex);
+    _glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, w, h);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    // Attach to FBO
-    _glBindFramebuffer(GL_FRAMEBUFFER, gTempDepthFBO);
-    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, gTempDepthTex, 0);
-    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gTempDummyColorTex, 0);
+    _glBindFramebuffer(GL_FRAMEBUFFER, gTempFBO);
+    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                            GL_TEXTURE_2D, gTempDepthTex, 0);
+    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                            GL_TEXTURE_2D, gTempColorTex, 0);
 
-    GLenum status = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        DBG_LOG("Depth overlay: temp depth FBO incomplete, status=0x%x", status);
+    GLenum st = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (st != GL_FRAMEBUFFER_COMPLETE) {
+        DOV_LOG("temp FBO incomplete: 0x%x", st);
         return false;
     }
-
     _glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    gTempDepthWidth = width;
-    gTempDepthHeight = height;
-    DBG_LOG("Depth overlay: cached temp depth resources FBO=%d tex=%d dummyColor=%d size=%dx%d",
-            gTempDepthFBO, gTempDepthTex, gTempDummyColorTex, width, height);
+    gTempW = w;
+    gTempH = h;
     return true;
 }
 
-static void CleanupTempDepthResources() {
-    if (gTempDepthFBO) { _glDeleteFramebuffers(1, &gTempDepthFBO); gTempDepthFBO = 0; }
+static void CleanupTempResources() {
+    if (gTempFBO) { _glDeleteFramebuffers(1, &gTempFBO); gTempFBO = 0; }
     if (gTempDepthTex) { _glDeleteTextures(1, &gTempDepthTex); gTempDepthTex = 0; }
-    if (gTempDummyColorTex) { _glDeleteTextures(1, &gTempDummyColorTex); gTempDummyColorTex = 0; }
-    gTempDepthWidth = 0;
-    gTempDepthHeight = 0;
+    if (gTempColorTex) { _glDeleteTextures(1, &gTempColorTex); gTempColorTex = 0; }
+    gTempW = gTempH = 0;
 }
 
-void InitDepthOverlay(int width, int height) {
-    DBG_LOG("Depth overlay: InitDepthOverlay called, width=%d, height=%d, current=(%d,%d), initDone=%d", 
-            width, height, gOverlayWidth, gOverlayHeight, gOverlayInitDone ? 1 : 0);
-    
-    if (gOverlayInitDone && gOverlayWidth == width && gOverlayHeight == height) {
-        DBG_LOG("Depth overlay: skip init, same size");
-        return;
+// RAII: swaps gTempFBO's depth attachment, restores on scope exit
+struct DepthAttachSwap {
+    GLuint fbo;
+    GLuint origTex;
+    DepthAttachSwap(GLuint f, GLuint swapTo, GLuint orig)
+        : fbo(f), origTex(orig) {
+        _glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                GL_TEXTURE_2D, swapTo, 0);
     }
-    
-    DBG_LOG("Depth overlay: cleaning up old resources");
+    ~DepthAttachSwap() {
+        _glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                GL_TEXTURE_2D, origTex, 0);
+    }
+};
+
+// ====================================================================
+// Init / Cleanup
+// ====================================================================
+
+void InitDepthOverlay(int width, int height) {
+    DOV_LOG("InitDepthOverlay %dx%d (was %dx%d, done=%d)",
+            width, height, gOverlayWidth, gOverlayHeight, gOverlayInitDone ? 1 : 0);
+
+    if (gOverlayInitDone && gOverlayWidth == width && gOverlayHeight == height)
+        return;
+
     CleanupDepthOverlay();
-    
-    DBG_LOG("Depth overlay: creating overlay FBO and color texture");
+
+    // Overlay FBO (side-by-side output, color only)
     _glGenFramebuffers(1, &gOverlayFBO);
     _glGenTextures(1, &gOverlayColorTex);
-    
     _glBindTexture(GL_TEXTURE_2D, gOverlayColorTex);
-    // _glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     _glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    DBG_LOG("Depth overlay: overlayColorTex=%d created", gOverlayColorTex);
-    
     _glBindFramebuffer(GL_FRAMEBUFFER, gOverlayFBO);
-    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gOverlayColorTex, 0);
-    CHECK_FBO_STATUS(gOverlayFBO, "gOverlayFBO");
-    DO_CHECK_GL_ERROR("after gOverlayFBO setup");
-    
-    DBG_LOG("Depth overlay: creating depth blit FBO and color texture");
+    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                            GL_TEXTURE_2D, gOverlayColorTex, 0);
+    CHECK_FBO(gOverlayFBO, "overlay");
+
+    // Depth blit FBO (depth→grayscale output, color only)
     _glGenFramebuffers(1, &gDepthBlitFBO);
     _glGenTextures(1, &gDepthBlitColorTex);
-    
     _glBindTexture(GL_TEXTURE_2D, gDepthBlitColorTex);
     _glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    DBG_LOG("Depth overlay: depthBlitColorTex=%d created", gDepthBlitColorTex);
-    
     _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
-    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gDepthBlitColorTex, 0);
-    CHECK_FBO_STATUS(gDepthBlitFBO, "gDepthBlitFBO");
-    DO_CHECK_GL_ERROR("after gDepthBlitFBO setup");
-    
-    GLenum status = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        DBG_LOG("Depth overlay: FBO incomplete status=0x%x", status);
-    } else {
-        DBG_LOG("Depth overlay: FBO status=COMPLETE");
-    }
-    
-    DBG_LOG("Depth overlay: compiling depth-to-color shader");
-    GLuint vertShader1 = compile_shader(GL_VERTEX_SHADER, DEPTH_TO_COLOR_VERTEX_SHADER);
-    GLuint fragShader1 = compile_shader(GL_FRAGMENT_SHADER, DEPTH_TO_COLOR_FRAGMENT_SHADER);
-    gDepthToColorProgram = _glCreateProgram();
-    _glAttachShader(gDepthToColorProgram, vertShader1);
-    _glAttachShader(gDepthToColorProgram, fragShader1);
-    _glLinkProgram(gDepthToColorProgram);
-    
-    GLint linkStatus = 0;
-    _glGetProgramiv(gDepthToColorProgram, GL_LINK_STATUS, &linkStatus);
-    DBG_LOG("Depth overlay: depth-to-color program linkStatus=%d, vertShader=%d, fragShader=%d",
-            linkStatus, vertShader1, fragShader1);
-    if (linkStatus == GL_FALSE) {
-        GLint infoLen = 0;
-        _glGetProgramiv(gDepthToColorProgram, GL_INFO_LOG_LENGTH, &infoLen);
-        if (infoLen > 1) {
-            char* infoLog = new char[infoLen];
-            _glGetProgramInfoLog(gDepthToColorProgram, infoLen, NULL, infoLog);
-            DBG_LOG("Depth overlay: depth-to-color program link error: %s", infoLog);
-            delete[] infoLog;
-        }
-    } else {
-        DBG_LOG("Depth overlay: depth-to-color program linked successfully");
-    }
-    
-    _glDeleteShader(vertShader1);
-    _glDeleteShader(fragShader1);
-    DBG_LOG("Depth overlay: depthToColorProgram=%d", gDepthToColorProgram);
-    
-    DBG_LOG("Depth overlay: compiling side-by-side shader");
-    GLuint vertShader2 = compile_shader(GL_VERTEX_SHADER, SIDE_BY_SIDE_VERTEX_SHADER);
-    GLuint fragShader2 = compile_shader(GL_FRAGMENT_SHADER, SIDE_BY_SIDE_FRAGMENT_SHADER);
-    gSideBySideProgram = _glCreateProgram();
-    _glAttachShader(gSideBySideProgram, vertShader2);
-    _glAttachShader(gSideBySideProgram, fragShader2);
-    _glLinkProgram(gSideBySideProgram);
-    
-    GLint linkStatus2 = 0;
-    _glGetProgramiv(gSideBySideProgram, GL_LINK_STATUS, &linkStatus2);
-    if (linkStatus2 == GL_FALSE) {
-        GLint infoLen2 = 0;
-        _glGetProgramiv(gSideBySideProgram, GL_INFO_LOG_LENGTH, &infoLen2);
-        if (infoLen2 > 1) {
-            char* infoLog2 = new char[infoLen2];
-            _glGetProgramInfoLog(gSideBySideProgram, infoLen2, NULL, infoLog2);
-            DBG_LOG("Depth overlay: side-by-side program link error: %s", infoLog2);
-            delete[] infoLog2;
-        }
-    } else {
-        DBG_LOG("Depth overlay: side-by-side program linked successfully");
-    }
-    
-    _glDeleteShader(vertShader2);
-    _glDeleteShader(fragShader2);
-    DBG_LOG("Depth overlay: sideBySideProgram=%d", gSideBySideProgram);
+    _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                            GL_TEXTURE_2D, gDepthBlitColorTex, 0);
+    CHECK_FBO(gDepthBlitFBO, "depthBlit");
 
-    DBG_LOG("Depth overlay: compiling depth test visualization shader");
-    GLuint vertShader3 = compile_shader(GL_VERTEX_SHADER, DEPTH_TEST_VIS_VERTEX_SHADER);
-    GLuint fragShader3 = compile_shader(GL_FRAGMENT_SHADER, DEPTH_TEST_VIS_FRAGMENT_SHADER);
-    gDepthTestVisProgram = _glCreateProgram();
-    _glAttachShader(gDepthTestVisProgram, vertShader3);
-    _glAttachShader(gDepthTestVisProgram, fragShader3);
-    _glLinkProgram(gDepthTestVisProgram);
+    // Shaders
+    GLuint vs1 = compile_shader(GL_VERTEX_SHADER, DEPTH_TO_COLOR_VS);
+    GLuint fs1 = compile_shader(GL_FRAGMENT_SHADER, DEPTH_TO_COLOR_FS);
+    gDepthToColorProgram = (vs1 && fs1) ? link_program(vs1, fs1) : 0;
 
-    GLint linkStatus3 = 0;
-    _glGetProgramiv(gDepthTestVisProgram, GL_LINK_STATUS, &linkStatus3);
-    if (linkStatus3 == GL_FALSE) {
-        GLint infoLen3 = 0;
-        _glGetProgramiv(gDepthTestVisProgram, GL_INFO_LOG_LENGTH, &infoLen3);
-        if (infoLen3 > 1) {
-            char* infoLog3 = new char[infoLen3];
-            _glGetProgramInfoLog(gDepthTestVisProgram, infoLen3, NULL, infoLog3);
-            DBG_LOG("Depth overlay: depth test vis program link error: %s", infoLog3);
-            delete[] infoLog3;
-        }
-    } else {
-        DBG_LOG("Depth overlay: depth test vis program linked successfully");
-    }
+    GLuint vs2 = compile_shader(GL_VERTEX_SHADER, DEPTH_TEST_VIS_VS);
+    GLuint fs2 = compile_shader(GL_FRAGMENT_SHADER, DEPTH_TEST_VIS_FS);
+    gDepthTestVisProgram = (vs2 && fs2) ? link_program(vs2, fs2) : 0;
 
-    _glDeleteShader(vertShader3);
-    _glDeleteShader(fragShader3);
-    DBG_LOG("Depth overlay: depthTestVisProgram=%d", gDepthTestVisProgram);
-    
     _glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
     gOverlayWidth = width;
     gOverlayHeight = height;
     gOverlayInitDone = GL_TRUE;
-    gLastFrameTime = std::chrono::high_resolution_clock::now();
     gStableFrameCount = 0;
-    
-    DBG_LOG("Depth overlay: initialized successfully, FBO=(%d,%d), Tex=(%d,%d), programs=(%d,%d)",
-            gOverlayFBO, gDepthBlitFBO, gOverlayColorTex, gDepthBlitColorTex, 
-            gDepthToColorProgram, gSideBySideProgram);
+
+    DOV_LOG("init done: FBOs=(%d,%d) progs=(%d,%d)",
+            gOverlayFBO, gDepthBlitFBO, gDepthToColorProgram, gDepthTestVisProgram);
 }
 
-static GLuint findFBOWithDepth() {
-    GLuint bestFBO = 0;
-    bool bestHasColor = false;
-
-    // Scan FBOs and prefer ones that have both color AND depth attachments.
-    // Note: we cannot query texture dimensions via glGetTexLevelParameteriv (desktop GL only).
-    // Prefer FBOs with color+depth over FBOs with only depth (e.g. shadow maps).
-    for (GLuint fbo = 1; fbo < 256; fbo++) {
-        GLint depthType = GL_NONE;
-        _glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                              GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &depthType);
-
-        if (depthType != GL_NONE && depthType != GL_FRAMEBUFFER) {
-            GLint colorType = GL_NONE;
-            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                                  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &colorType);
-            bool hasColor = (colorType != GL_NONE);
-
-            // Prefer FBOs with both color and depth (likely scene FBOs, not shadow maps)
-            if (hasColor && !bestHasColor) {
-                bestFBO = fbo;
-                bestHasColor = true;
-                DBG_LOG("Depth overlay: found candidate FBO=%d with color+depth, depthType=0x%x",
-                        fbo, depthType);
-            } else if (!bestHasColor) {
-                // Only depth, no color yet found — use as fallback
-                bestFBO = fbo;
-                DBG_LOG("Depth overlay: found candidate FBO=%d with depth only, depthType=0x%x",
-                        fbo, depthType);
-            }
-        }
-    }
-
-    _glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
-    if (bestFBO > 0) {
-        DBG_LOG("Depth overlay: selected FBO=%d as best depth source", bestFBO);
-    } else {
-        DBG_LOG("Depth overlay: no FBO with depth found after scanning 1-255");
-    }
-    
-    return bestFBO;
+void CleanupDepthOverlay() {
+    DOV_LOG("CleanupDepthOverlay");
+    if (gOverlayFBO) { _glDeleteFramebuffers(1, &gOverlayFBO); gOverlayFBO = 0; }
+    if (gOverlayColorTex) { _glDeleteTextures(1, &gOverlayColorTex); gOverlayColorTex = 0; }
+    if (gDepthBlitFBO) { _glDeleteFramebuffers(1, &gDepthBlitFBO); gDepthBlitFBO = 0; }
+    if (gDepthBlitColorTex) { _glDeleteTextures(1, &gDepthBlitColorTex); gDepthBlitColorTex = 0; }
+    if (gDepthToColorProgram) { _glDeleteProgram(gDepthToColorProgram); gDepthToColorProgram = 0; }
+    if (gDepthTestVisProgram) { _glDeleteProgram(gDepthTestVisProgram); gDepthTestVisProgram = 0; }
+    CleanupTempResources();
+    gOverlayInitDone = GL_FALSE;
+    gOverlayWidth = gOverlayHeight = 0;
+    gStableFrameCount = 0;
 }
+
+// ====================================================================
+// Render — called from UpdateDepthOverlay each frame
+// ====================================================================
 
 void RenderDepthOverlay(int width, int height) {
-    auto frameStart = std::chrono::high_resolution_clock::now();
-    
-    struct ResetGuard {
-        ~ResetGuard() { gLastDepthBlitTargetFBO = 0; }
-    } resetGuard;
-    
-    GLint savedFBO = 0, savedProgram = 0, savedViewport[4] = {0, 0, 0, 0};
-    GLint savedArrayBuffer = 0, savedTexture2D = 0, savedActiveTexture = GL_TEXTURE0;
-    GLint savedScissorTest = 0, savedBlend = 0, savedDepthTest = 0, savedStencilTest = 0;
-    GLint savedColorWriteMask[4] = {0, 0, 0, 0};
-    _glGetIntegerv(GL_FRAMEBUFFER_BINDING, &savedFBO);
-    _glGetIntegerv(GL_CURRENT_PROGRAM, &savedProgram);
-    _glGetIntegerv(GL_VIEWPORT, savedViewport);
-    _glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &savedArrayBuffer);
-    _glGetIntegerv(GL_TEXTURE_BINDING_2D, &savedTexture2D);
-    _glGetIntegerv(GL_ACTIVE_TEXTURE, &savedActiveTexture);
-    _glGetIntegerv(GL_SCISSOR_TEST, &savedScissorTest);
-    _glGetIntegerv(GL_BLEND, &savedBlend);
-    _glGetIntegerv(GL_DEPTH_TEST, &savedDepthTest);
-    _glGetIntegerv(GL_STENCIL_TEST, &savedStencilTest);
-    _glGetIntegerv(GL_COLOR_WRITEMASK, savedColorWriteMask);
+    auto t0 = std::chrono::high_resolution_clock::now();
 
-    // Save vertex attrib enable states
+    // ---- Save GL state ----
+    GLint sFBO, sProg, sVP[4], sABuf, sTex2D, sActiveTex;
+    GLint sScissor, sBlend, sDepth, sStencil, sColorMask[4];
+    _glGetIntegerv(GL_FRAMEBUFFER_BINDING, &sFBO);
+    _glGetIntegerv(GL_CURRENT_PROGRAM, &sProg);
+    _glGetIntegerv(GL_VIEWPORT, sVP);
+    _glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &sABuf);
+    _glGetIntegerv(GL_TEXTURE_BINDING_2D, &sTex2D);
+    _glGetIntegerv(GL_ACTIVE_TEXTURE, &sActiveTex);
+    _glGetIntegerv(GL_SCISSOR_TEST, &sScissor);
+    _glGetIntegerv(GL_BLEND, &sBlend);
+    _glGetIntegerv(GL_DEPTH_TEST, &sDepth);
+    _glGetIntegerv(GL_STENCIL_TEST, &sStencil);
+    _glGetIntegerv(GL_COLOR_WRITEMASK, sColorMask);
+
+    // Stack array for vertex attrib enables (no heap alloc)
     GLint maxAttribs = 0;
+    GLint sAttribEn[32];
     _glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttribs);
-    GLint* savedAttribEnable = nullptr;
-    if (maxAttribs > 0) {
-        savedAttribEnable = new GLint[maxAttribs];
-        for (int i = 0; i < maxAttribs; i++) {
-            _glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &savedAttribEnable[i]);
-        }
-    }
-    
-    GLint currentFBO = 0;
-    _glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
-    
-    GLuint sourceFBO = 0;
-    if (gLastDepthBlitTargetFBO != 0) {
-        sourceFBO = gLastDepthBlitTargetFBO;
-        DBG_LOG("Depth overlay: using recorded depth blit target FBO=%d", sourceFBO);
-    } else {
-        sourceFBO = currentFBO;
-        DBG_LOG("Depth overlay: no depth blit recorded, using current FBO=%d", sourceFBO);
-    }
-    
-    _glBindFramebuffer(GL_FRAMEBUFFER, sourceFBO);
-    
-    GLint colorAttachmentId = 0;
-    GLint depthAttachmentId = 0;
-    GLint depthAttachmentType = GL_NONE;
-    
-    _glGetFramebufferAttachmentParameteriv(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                          GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &colorAttachmentId);
-    _glGetFramebufferAttachmentParameteriv(GL_READ_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                          GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &depthAttachmentType);
-    _glGetFramebufferAttachmentParameteriv(GL_READ_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                          GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &depthAttachmentId);
-    
-    {
-        GLint readFBOBinding = 0;
-        _glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFBOBinding);
-        DBG_LOG("Depth overlay: sourceFBO=%d, GL_READ_FRAMEBUFFER_BINDING=%d, GL_FRAMEBUFFER_BINDING=%d",
-                sourceFBO, readFBOBinding, currentFBO);
-        
-        GLint srcDepthType = GL_NONE, srcDepthId = 0;
-        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                              GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &srcDepthType);
-        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                              GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &srcDepthId);
-        GLint srcColorType = GL_NONE, srcColorId = 0;
-        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                              GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &srcColorType);
-        _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                              GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &srcColorId);
-        DBG_LOG("Depth overlay: sourceFBO=%d has depth(type=0x%x,id=%d) color(type=0x%x,id=%d)",
-                sourceFBO, srcDepthType, srcDepthId, srcColorType, srcColorId);
-        DO_CHECK_GL_ERROR("after query sourceFBO attachments");
-        
-        if (srcDepthType == GL_TEXTURE && srcDepthId > 0) {
-            // GLES has no GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_WIDTH/HEIGHT (desktop GL only)
-            // Use the already-known width/height for debug logging
-            GLint depthRedSize = 0;
-            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &depthRedSize);
-            DBG_LOG("Depth overlay: sourceFBO depth texture id=%d size=%dx%d redSize=%d",
-                    srcDepthId, width, height, depthRedSize);
-            DO_CHECK_GL_ERROR("after query depth texture params");
-        }
-    }
-    
-    if (depthAttachmentId == 0) {
-        GLuint fboWithDepth = findFBOWithDepth();
-        if (fboWithDepth > 0) {
-            sourceFBO = fboWithDepth;
-            _glBindFramebuffer(GL_FRAMEBUFFER, sourceFBO);
-            _glGetFramebufferAttachmentParameteriv(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                                  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &colorAttachmentId);
-            _glGetFramebufferAttachmentParameteriv(GL_READ_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                                  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &depthAttachmentType);
-            _glGetFramebufferAttachmentParameteriv(GL_READ_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                                                  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &depthAttachmentId);
-            DBG_LOG("Depth overlay: switched to FBO=%d for depth, color=%d, depth=(type=0x%x,id=%d)",
-                    sourceFBO, colorAttachmentId, depthAttachmentType, depthAttachmentId);
-        }
-    }
-    
-    DBG_LOG("Depth overlay: render frameID=%d, size=%dx%d, sourceFBO=%d, color=%d, depth=(type=0x%x,id=%d), currentFBO=%d",
-            gFrameCount, width, height, sourceFBO, colorAttachmentId, depthAttachmentType, depthAttachmentId, currentFBO);
-    DBG_LOG("Depth overlay: shader programs - depthToColor=%d, sideBySide=%d, gDepthBlitFBO=%d, gOverlayFBO=%d",
-            gDepthToColorProgram, gSideBySideProgram, gDepthBlitFBO, gOverlayFBO);
+    if (maxAttribs > 32) maxAttribs = 32;
+    for (int i = 0; i < maxAttribs; i++)
+        _glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &sAttribEn[i]);
 
-    if (colorAttachmentId == 0 || depthAttachmentId == 0) {
-        if (!gDepthAvailableReported) {
-            DBG_LOG("Depth overlay: no color or depth attachment, colorId=%d, depthId=%d", 
-                    colorAttachmentId, depthAttachmentId);
-            gDepthAvailableReported = true;
-        }
-        _glBindFramebuffer(GL_FRAMEBUFFER, savedFBO);
-        _glUseProgram(savedProgram);
-        _glViewport(savedViewport[0], savedViewport[1], savedViewport[2], savedViewport[3]);
-        _glBindBuffer(GL_ARRAY_BUFFER, savedArrayBuffer);
-        _glBindTexture(GL_TEXTURE_2D, savedTexture2D);
-        _glActiveTexture(savedActiveTexture);
-        delete[] savedAttribEnable;
-        return;
-    }
+    GLint currentFBO = sFBO;  // Usually 0 (default) at eglSwapBuffers time
 
-    gDepthAvailableReported = false;
+    // ---- Depth visualization using captured data ----
+    // The depth was captured during frame rendering (glBlitFramebuffer hook),
+    // before eglSwapBuffers. Data persists in gCapturedDepthFBO.
+    bool depthOk = false;
 
-    // CRITICAL: On tile-based mobile GPUs (Mali, Adreno, PowerVR), rendering commands
-    // are deferred until a flush. Our code runs in eglSwapBuffers BEFORE the real swap,
-    // so depth values may still be in on-chip tiles and not written to the texture yet.
-    // _glFinish() forces the GPU to complete all pending work.
-    DBG_LOG("Depth overlay: calling _glFinish() to flush tile-based GPU");
-    _glFinish();
-
-    // === 验证帧中捕获的深度数据 ===
-    // 在 glBlitFramebuffer hook 中，游戏做 depth blit 时我们同步捕获了深度。
-    // gCapturedDepthFBO 里有捕获的深度数据。验证它是否非空。
-    {
-        if (gDepthCapturedThisFrame && gCapturedDepthFBO != 0) {
-            DBG_LOG("DIAG capture: depth was captured this frame, capFBO=%d %dx%d",
-                    gCapturedDepthFBO, gCapturedDepthWidth, gCapturedDepthHeight);
-
-            // 在捕获的 FBO 上做深度测试来验证数据
-            // 需要一个 color attachment 来读回结果，所以先附加一个临时 color
-            bool needColorAttach = false;
-            _glBindFramebuffer(GL_FRAMEBUFFER, gCapturedDepthFBO);
-            GLint colorType = GL_NONE;
-            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &colorType);
-            if (colorType != GL_TEXTURE && colorType != GL_RENDERBUFFER) {
-                // 没有颜色附件，临时附加一个
-                needColorAttach = true;
-                if (!gTempDummyColorTex) {
-                    _glGenTextures(1, &gTempDummyColorTex);
-                }
-                _glBindTexture(GL_TEXTURE_2D, gTempDummyColorTex);
-                _glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8,
-                                gCapturedDepthWidth, gCapturedDepthHeight);
-                _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                        GL_TEXTURE_2D, gTempDummyColorTex, 0);
-            }
-
-            GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-            _glDrawBuffers(1, drawBuffers);
-
-            _glViewport(0, 0, gCapturedDepthWidth, gCapturedDepthHeight);
-            _glClearColor(1.0f, 0.0f, 0.0f, 1.0f);  // RED
-            _glClear(GL_COLOR_BUFFER_BIT);  // 只清 color，不清 depth！
-
-            _glUseProgram(gDepthToColorProgram);
-            _glActiveTexture(GL_TEXTURE0);
-            _glBindTexture(GL_TEXTURE_2D, 0);
-            _glUniform1i(_glGetUniformLocation(gDepthToColorProgram, "u_depthTexture"), 0);
-            GLint diagPosLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
-            GLint diagTexLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
-            if (diagTexLoc >= 0) _glDisableVertexAttribArray(diagTexLoc);
-            _glEnableVertexAttribArray(diagPosLoc);
-            // Z=0.0 → depth threshold = 0.5
-            float dv[] = { -1,-1,0.0f, 1,-1,0.0f, -1,1,0.0f, 1,1,0.0f };
-            _glVertexAttribPointer(diagPosLoc, 3, GL_FLOAT, GL_FALSE, 0, dv);
-
-            _glEnable(GL_DEPTH_TEST);
-            _glDepthFunc(GL_LESS);
-            _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            _glDisable(GL_DEPTH_TEST);
-
-            GLubyte dp[4] = {0};
-            _glReadPixels(gCapturedDepthWidth/2, gCapturedDepthHeight/2, 1, 1,
-                          GL_RGBA, GL_UNSIGNED_BYTE, dp);
-            DBG_LOG("DIAG capture: depth test on capFBO R=%d G=%d B=%d (%s)",
-                    dp[0], dp[1], dp[2],
-                    dp[0] == 0 ? "BLACK=DATA_EXISTS!" : "RED=empty");
-
-            if (dp[0] == 0) {
-                DBG_LOG("DIAG capture: CONCLUSION=DEPTH_DATA_CAPTURED_SUCCESSFULLY");
-            } else {
-                DBG_LOG("DIAG capture: CONCLUSION=CAPTURED_BUT_EMPTY (capture failed?)");
-            }
-            while (_glGetError() != GL_NO_ERROR) {}
-        } else {
-            DBG_LOG("DIAG capture: NO depth captured this frame (gDepthCaptured=%d capFBO=%d)",
-                    gDepthCapturedThisFrame ? 1 : 0, gCapturedDepthFBO);
-        }
-    }
-
-    bool depthReadOk = false;
-    float vertices[] = { -1, -1, 0,  1, -1, 0,  -1, 1, 0,  1, 1, 0 };
-    float texCoords[] = { 0, 0,  1, 0,  0, 1,  1, 1 };
-
-    // === 使用在 glBlitFramebuffer hook 中捕获的深度数据 ===
-    // 深度数据在游戏帧渲染期间被捕获（此时 tile-based GPU 的深度还在 on-chip 中）。
-    // gCapturedDepthFBO 包含捕获的深度纹理。
     if (gDepthCapturedThisFrame && gCapturedDepthFBO != 0) {
-        DBG_LOG("Depth overlay: using captured depth capFBO=%d %dx%d",
-                gCapturedDepthFBO, gCapturedDepthWidth, gCapturedDepthHeight);
-
-        // 获取捕获 FBO 的深度纹理 ID
+        // Get the depth texture from captured FBO
         _glBindFramebuffer(GL_FRAMEBUFFER, gCapturedDepthFBO);
-        GLint capDepthType = GL_NONE, capDepthId = 0;
+        GLint capType = GL_NONE, capId = 0;
         _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &capDepthType);
+            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &capType);
         _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &capDepthId);
-        DBG_LOG("Depth overlay: capFBO depth(type=0x%x, id=%d)", capDepthType, capDepthId);
+            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &capId);
 
-        if (capDepthType == GL_TEXTURE && capDepthId > 0) {
-            // === Plan A: Shader 采样捕获的深度纹理 ===
-            _glBindTexture(GL_TEXTURE_2D, capDepthId);
+        if (capType == GL_TEXTURE && capId > 0) {
+            DOV_LOG("depth capTex=%d %dx%d", capId, gCapturedDepthWidth, gCapturedDepthHeight);
+
+            // Set texture params
+            _glBindTexture(GL_TEXTURE_2D, capId);
             _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -645,96 +361,85 @@ void RenderDepthOverlay(int width, int height) {
             _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             while (_glGetError() != GL_NO_ERROR) {}
 
-            _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
-            _glViewport(0, 0, gCapturedDepthWidth, gCapturedDepthHeight);
-            {
-                GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-                _glDrawBuffers(1, drawBuffers);
+            float verts[] = { -1,-1,0, 1,-1,0, -1,1,0, 1,1,0 };
+            float uvs[]   = { 0,0, 1,0, 0,1, 1,1 };
+            int cw = gCapturedDepthWidth, ch = gCapturedDepthHeight;
+
+            // ===== Plan A: Shader sampling =====
+            // May work on some GPUs; fails on others (GLES 3.0 spec: undefined
+            // for sampler2D on DEPTH24_STENCIL8).
+            if (!depthOk && gDepthToColorProgram) {
+                _glBindFramebuffer(GL_FRAMEBUFFER, gDepthBlitFBO);
+                _glViewport(0, 0, cw, ch);
+                GLenum db[] = {GL_COLOR_ATTACHMENT0};
+                _glDrawBuffers(1, db);
+                _glClearColor(0,0,0,1);
+                _glClear(GL_COLOR_BUFFER_BIT);
+                _glDisable(GL_DEPTH_TEST);
+                while (_glGetError() != GL_NO_ERROR) {}
+
+                _glUseProgram(gDepthToColorProgram);
+                _glActiveTexture(GL_TEXTURE0);
+                _glBindTexture(GL_TEXTURE_2D, capId);
+                _glUniform1i(_glGetUniformLocation(gDepthToColorProgram, "u_depthTexture"), 0);
+
+                GLint pLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
+                GLint tLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+                _glVertexAttribPointer(pLoc, 3, GL_FLOAT, GL_FALSE, 0, verts);
+                _glVertexAttribPointer(tLoc, 2, GL_FLOAT, GL_FALSE, 0, uvs);
+                _glEnableVertexAttribArray(pLoc);
+                if (tLoc >= 0) _glEnableVertexAttribArray(tLoc);
+                _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+                DOV_DIAG("PlanA err=0x%x", _glGetError());
+
+                GLubyte px[4] = {};
+                _glReadPixels(cw/2, ch/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+                DOV_DIAG("PlanA R=%d G=%d B=%d", px[0], px[1], px[2]);
+
+                if (px[0] > 0 || px[1] > 0 || px[2] > 0) {
+                    depthOk = true;
+                    DOV_LOG("PlanA OK");
+                } else {
+                    DOV_LOG("PlanA=0, try PlanB");
+                }
+                while (_glGetError() != GL_NO_ERROR) {}
             }
-            _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            _glClear(GL_COLOR_BUFFER_BIT);
-            _glDisable(GL_DEPTH_TEST);
-            while (_glGetError() != GL_NO_ERROR) {}
 
-            _glUseProgram(gDepthToColorProgram);
-            _glActiveTexture(GL_TEXTURE0);
-            _glBindTexture(GL_TEXTURE_2D, capDepthId);
-            GLint depthTexLoc = _glGetUniformLocation(gDepthToColorProgram, "u_depthTexture");
-            _glUniform1i(depthTexLoc, 0);
-            GLint posLoc = _glGetAttribLocation(gDepthToColorProgram, "a_position");
-            GLint texLoc = _glGetAttribLocation(gDepthToColorProgram, "a_texCoord");
+            // ===== Plan B: N-pass depth test =====
+            // Uses GPU hardware depth test (no texture sampling).
+            // Guarantees correct output if depth data exists.
+            if (!depthOk && gDepthTestVisProgram && EnsureTempResources(cw, ch)) {
+                // Swap depth attachment: captured depth → temp FBO
+                DepthAttachSwap swapGuard(gTempFBO, capId, gTempDepthTex);
 
-            _glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-            _glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-            _glEnableVertexAttribArray(posLoc);
-            _glEnableVertexAttribArray(texLoc);
-            _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-            GLenum shaderErr = _glGetError();
-            DBG_LOG("Depth overlay: captured shader draw err=0x%x", shaderErr);
-
-            // 验证 shader 输出
-            GLubyte pixel[4] = {0};
-            _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
-            _glReadPixels(gCapturedDepthWidth/2, gCapturedDepthHeight/2, 1, 1,
-                          GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-            DBG_LOG("DIAG captured shader: gDepthBlitFBO center R=%d G=%d B=%d A=%d",
-                    pixel[0], pixel[1], pixel[2], pixel[3]);
-
-            if (pixel[0] > 0 || pixel[1] > 0 || pixel[2] > 0) {
-                depthReadOk = true;
-                DBG_LOG("Depth overlay: captured depth shader sampling SUCCESS!");
-            } else {
-                DBG_LOG("Depth overlay: captured depth shader returned 0, trying N-pass depth test");
-            }
-            while (_glGetError() != GL_NO_ERROR) {}
-
-            // === Plan B: N-pass 深度测试（GPU 硬件保证工作） ===
-            // 如果 shader 采样失败（GLES 3.0 sampler2D 采样 DEPTH24_STENCIL8 可能 undefined），
-            // 用 GPU 固定管线的深度测试将深度缓冲转换为灰度图。
-            if (!depthReadOk && EnsureTempDepthResources(gCapturedDepthWidth, gCapturedDepthHeight)) {
-                // 将捕获的深度纹理附加到临时 FBO 作为 depth，用临时 color 输出灰度
-                _glBindFramebuffer(GL_FRAMEBUFFER, gTempDepthFBO);
-                _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                    GL_TEXTURE_2D, capDepthId, 0);
-
-                GLenum status = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
-                DBG_LOG("Depth overlay: N-pass temp FBO status=0x%x", status);
-
-                if (status == GL_FRAMEBUFFER_COMPLETE) {
-                    _glViewport(0, 0, gCapturedDepthWidth, gCapturedDepthHeight);
-                    {
-                        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-                        _glDrawBuffers(1, drawBuffers);
-                    }
-                    // 只清 color，不清 depth（保留捕获的深度数据）
-                    _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-                    _glClear(GL_COLOR_BUFFER_BIT);
+                if (_glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+                    _glViewport(0, 0, cw, ch);
+                    GLenum db[] = {GL_COLOR_ATTACHMENT0};
+                    _glDrawBuffers(1, db);
+                    _glClearColor(0,0,0,1);
+                    _glClear(GL_COLOR_BUFFER_BIT);  // clear color only, keep depth!
 
                     _glEnable(GL_DEPTH_TEST);
                     _glDepthFunc(GL_LESS);
                     _glEnable(GL_BLEND);
-                    _glBlendFunc(GL_ONE, GL_ONE);  // additive blending
-                    _glDepthMask(GL_FALSE);  // 不写入深度，只读取
+                    _glBlendFunc(GL_ONE, GL_ONE);  // additive
+                    _glDepthMask(GL_FALSE);         // read depth only, don't write
 
                     _glUseProgram(gDepthTestVisProgram);
-                    GLint brightnessLoc = _glGetUniformLocation(gDepthTestVisProgram, "u_brightness");
-                    GLint npassPosLoc = _glGetAttribLocation(gDepthTestVisProgram, "a_position");
+                    GLint bLoc = _glGetUniformLocation(gDepthTestVisProgram, "u_brightness");
+                    GLint pLoc = _glGetAttribLocation(gDepthTestVisProgram, "a_position");
+                    _glEnableVertexAttribArray(pLoc);
 
-                    _glEnableVertexAttribArray(npassPosLoc);
-
-                    // N 次循环：每次在不同 NDC Z 阈值绘制白色 quad
-                    // GL_LESS: fragment_z < stored_depth → 通过 → 输出亮度
-                    // 累加结果：亮度正比于 depth 值
+                    // N passes at evenly spaced Z thresholds.
+                    // GL_LESS: fragment passes when frag_z < stored_depth.
+                    // Brightness accumulates proportionally to depth value.
                     const int N = 16;
-                    const float brightness = 1.0f / N;
-                    _glUniform1f(brightnessLoc, brightness);
-
+                    _glUniform1f(bLoc, 1.0f / N);
                     for (int i = 0; i < N; i++) {
-                        // NDC Z 从 -1 到 +1 均匀分布（对应 depth 0.0 到 1.0）
-                        float ndcZ = -1.0f + 2.0f * (i + 1) / (N + 1);
-                        float zv[] = { -1,-1,ndcZ, 1,-1,ndcZ, -1,1,ndcZ, 1,1,ndcZ };
-                        _glVertexAttribPointer(npassPosLoc, 3, GL_FLOAT, GL_FALSE, 0, zv);
+                        float z = -1.0f + 2.0f * (i + 1) / (N + 1);
+                        float zv[] = { -1,-1,z, 1,-1,z, -1,1,z, 1,1,z };
+                        _glVertexAttribPointer(pLoc, 3, GL_FLOAT, GL_FALSE, 0, zv);
                         _glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
                     }
 
@@ -742,226 +447,122 @@ void RenderDepthOverlay(int width, int height) {
                     _glDisable(GL_BLEND);
                     _glDepthMask(GL_TRUE);
 
-                    // 验证 N-pass 输出
-                    GLubyte npixel[4] = {0};
-                    _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
-                    _glReadPixels(gCapturedDepthWidth/2, gCapturedDepthHeight/2, 1, 1,
-                                  GL_RGBA, GL_UNSIGNED_BYTE, npixel);
-                    DBG_LOG("DIAG N-pass: tempFBO center R=%d G=%d B=%d A=%d",
-                            npixel[0], npixel[1], npixel[2], npixel[3]);
+                    GLubyte px[4] = {};
+                    _glReadPixels(cw/2, ch/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+                    DOV_DIAG("PlanB R=%d G=%d B=%d", px[0], px[1], px[2]);
 
-                    if (npixel[0] > 0 || npixel[1] > 0 || npixel[2] > 0) {
-                        // N-pass 成功！把结果 blit 到 gDepthBlitFBO
-                        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempDepthFBO);
+                    if (px[0] > 0 || px[1] > 0 || px[2] > 0) {
+                        // Blit result to gDepthBlitFBO
+                        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gTempFBO);
                         _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gDepthBlitFBO);
-                        _glBlitFramebuffer(0, 0, gCapturedDepthWidth, gCapturedDepthHeight,
-                                           0, 0, gCapturedDepthWidth, gCapturedDepthHeight,
+                        _glBlitFramebuffer(0,0, cw,ch, 0,0, cw,ch,
                                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
-                        depthReadOk = true;
-                        DBG_LOG("Depth overlay: N-pass depth test SUCCESS!");
+                        depthOk = true;
+                        DOV_LOG("PlanB OK");
                     } else {
-                        DBG_LOG("Depth overlay: N-pass output is also 0 (depth data may be empty)");
+                        DOV_LOG("PlanB=0 (depth empty?)");
                     }
-                } else {
-                    DBG_LOG("Depth overlay: N-pass temp FBO incomplete, cannot proceed");
                 }
-
-                // 恢复 gTempDepthFBO 原来的 depth attachment
-                _glBindFramebuffer(GL_FRAMEBUFFER, gTempDepthFBO);
-                _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                    GL_TEXTURE_2D, gTempDepthTex, 0);
+                // swapGuard restores depth attachment here (RAII)
                 while (_glGetError() != GL_NO_ERROR) {}
             }
-        }
-    } else {
-        if (!gDepthCapturedThisFrame) {
-            DBG_LOG("Depth overlay: no captured depth this frame");
         } else {
-            DBG_LOG("Depth overlay: captured FBO is 0");
+            DOV_LOG("capFBO no depth tex");
         }
-    }
-
-    if (!depthReadOk) {
-        DBG_LOG("Depth overlay: all depth methods failed, showing game only");
-    }
-
-    while (_glGetError() != GL_NO_ERROR) {}
-
-    // --- Overlay assembly ---
-    _glBindFramebuffer(GL_FRAMEBUFFER, gOverlayFBO);
-    CHECK_FBO_STATUS(gOverlayFBO, "gOverlayFBO");
-    DO_CHECK_GL_ERROR("after bind gOverlayFBO");
-    _glViewport(0, 0, width, height);
-    _glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    _glClear(GL_COLOR_BUFFER_BIT);
-    DO_CHECK_GL_ERROR("after clear gOverlayFBO");
-    
-    _glDisable(GL_SCISSOR_TEST);
-
-    // DIAGNOSTIC: verify game content exists in currentFBO before blit
-    {
-        GLubyte pixel[4] = {0, 0, 0, 0};
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, currentFBO);
-        if (currentFBO == 0) _glReadBuffer(GL_BACK);
-        else _glReadBuffer(GL_COLOR_ATTACHMENT0);
-        _glReadPixels(width/2, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-        GLenum diagErr = _glGetError();
-        DBG_LOG("DIAG game content: currentFBO=%d center R=%d G=%d B=%d A=%d, err=0x%x",
-                currentFBO, pixel[0], pixel[1], pixel[2], pixel[3], diagErr);
-    }
-
-    DBG_LOG("Depth overlay: first blit - read from currentFBO=%d to gOverlayFBO left half", currentFBO);
-    _glBindFramebuffer(GL_READ_FRAMEBUFFER, currentFBO);
-    _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gOverlayFBO);
-    if (currentFBO == 0) {
-        _glReadBuffer(GL_BACK);
     } else {
-        _glReadBuffer(GL_COLOR_ATTACHMENT0);
+        DOV_LOG("no captured depth");
     }
-    {
-        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-        _glDrawBuffers(1, drawBuffers);
-    }
-    _glBlitFramebuffer(0, 0, width, height, 0, 0, width/2, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    DO_CHECK_GL_ERROR("after first blit (original color to left)");
-    
-    DBG_LOG("Depth overlay: second blit - read from gDepthBlitFBO=%d to gOverlayFBO right half", gDepthBlitFBO);
+
+    // ---- Overlay assembly ----
+    // Left half: game color | Right half: depth grayscale (or black)
+    _glBindFramebuffer(GL_FRAMEBUFFER, gOverlayFBO);
+    _glViewport(0, 0, width, height);
+    _glClearColor(0,0,0,1);
+    _glClear(GL_COLOR_BUFFER_BIT);
+    _glDisable(GL_SCISSOR_TEST);
+    GLenum db[] = {GL_COLOR_ATTACHMENT0};
+    _glDrawBuffers(1, db);
+
+    // Left: game content (from default FBO at eglSwapBuffers time)
+    _glBindFramebuffer(GL_READ_FRAMEBUFFER, currentFBO);
+    if (currentFBO == 0) _glReadBuffer(GL_BACK);
+    else _glReadBuffer(GL_COLOR_ATTACHMENT0);
+    _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gOverlayFBO);
+    _glBlitFramebuffer(0,0, width,height, 0,0, width/2,height,
+                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    DOV_DIAG("left blit err=0x%x", _glGetError());
+
+    // Right: depth visualization
     _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
-    _glBlitFramebuffer(0, 0, width, height, width/2, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    DO_CHECK_GL_ERROR("after second blit (depth to right)");
+    _glBlitFramebuffer(0,0, width,height, width/2,0, width,height,
+                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    DOV_DIAG("right blit err=0x%x", _glGetError());
 
-    // DIAGNOSTIC: verify overlay FBO has both halves
-    {
-        GLubyte pixelL[4] = {0, 0, 0, 0}, pixelR[4] = {0, 0, 0, 0};
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gOverlayFBO);
-        _glReadBuffer(GL_COLOR_ATTACHMENT0);
-        _glReadPixels(width/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixelL);
-        _glReadPixels(width*3/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixelR);
-        GLenum diagErr = _glGetError();
-        DBG_LOG("DIAG overlay: left(%d,%d) R=%d G=%d B=%d  right(%d,%d) R=%d G=%d B=%d  err=0x%x",
-                width/4, height/2, pixelL[0], pixelL[1], pixelL[2],
-                width*3/4, height/2, pixelR[0], pixelR[1], pixelR[2], diagErr);
-    }
-    
-    DBG_LOG("Depth overlay: final blit - from gOverlayFBO=%d to savedFBO=%d", gOverlayFBO, savedFBO);
+    // Final: overlay → original FBO
     _glBindFramebuffer(GL_READ_FRAMEBUFFER, gOverlayFBO);
-    _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, savedFBO);
-    _glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    DO_CHECK_GL_ERROR("after final blit to saved framebuffer");
-    
-    #ifdef DEPTH_OVERLAY_DEBUG
-    {
-        GLubyte pixel[4];
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, savedFBO);
-        _glReadPixels(width/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-        DBG_LOG("Depth overlay: savedFBO pixel at (%d,%d) R=%d,G=%d,B=%d,A=%d", width/4, height/2, pixel[0], pixel[1], pixel[2], pixel[3]);
-        DO_CHECK_GL_ERROR("after read savedFBO pixel");
+    _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sFBO);
+    _glBlitFramebuffer(0,0, width,height, 0,0, width,height,
+                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    DOV_DIAG("final blit err=0x%x", _glGetError());
 
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gDepthBlitFBO);
-        _glReadPixels(width/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-        DBG_LOG("Depth overlay: gDepthBlitFBO pixel at (%d,%d) R=%d,G=%d,B=%d,A=%d", width/4, height/2, pixel[0], pixel[1], pixel[2], pixel[3]);
-        DO_CHECK_GL_ERROR("after read gDepthBlitFBO pixel");
-
-        _glBindFramebuffer(GL_READ_FRAMEBUFFER, gOverlayFBO);
-        _glReadPixels(width/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-        DBG_LOG("Depth overlay: gOverlayFBO left pixel at (%d,%d) R=%d,G=%d,B=%d,A=%d", width/4, height/2, pixel[0], pixel[1], pixel[2], pixel[3]);
-        DO_CHECK_GL_ERROR("after read gOverlayFBO left pixel");
-
-        _glReadPixels(width*3/4, height/2, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
-        DBG_LOG("Depth overlay: gOverlayFBO right pixel at (%d,%d) R=%d,G=%d,B=%d,A=%d", width*3/4, height/2, pixel[0], pixel[1], pixel[2], pixel[3]);
-        DO_CHECK_GL_ERROR("after read gOverlayFBO right pixel");
+    // ---- Restore GL state ----
+    _glBindFramebuffer(GL_FRAMEBUFFER, sFBO);
+    _glUseProgram(sProg);
+    _glViewport(sVP[0], sVP[1], sVP[2], sVP[3]);
+    _glBindBuffer(GL_ARRAY_BUFFER, sABuf);
+    _glBindTexture(GL_TEXTURE_2D, sTex2D);
+    _glActiveTexture(sActiveTex);
+    if (sScissor) _glEnable(GL_SCISSOR_TEST); else _glDisable(GL_SCISSOR_TEST);
+    if (sBlend)   _glEnable(GL_BLEND);        else _glDisable(GL_BLEND);
+    if (sDepth)   _glEnable(GL_DEPTH_TEST);    else _glDisable(GL_DEPTH_TEST);
+    if (sStencil) _glEnable(GL_STENCIL_TEST);  else _glDisable(GL_STENCIL_TEST);
+    _glColorMask(sColorMask[0], sColorMask[1], sColorMask[2], sColorMask[3]);
+    for (int i = 0; i < maxAttribs; i++) {
+        if (sAttribEn[i]) _glEnableVertexAttribArray(i);
+        else _glDisableVertexAttribArray(i);
     }
-    #endif
 
-    // Temp depth resources are now cached, no per-frame cleanup needed
-    
-    auto frameEnd = std::chrono::high_resolution_clock::now();
-    gFrameTimeMs = std::chrono::duration<float, std::milli>(frameEnd - frameStart).count();
+    // ---- Timing ----
+    auto t1 = std::chrono::high_resolution_clock::now();
+    gFrameTimeMs = std::chrono::duration<float, std::milli>(t1 - t0).count();
     gFrameCount++;
-    
     if (gFrameCount % 60 == 0) {
-        DBG_LOG("Depth overlay FPS: %.1f, frame time: %.2f ms, frameID=%d", 
-                1000.0f / gFrameTimeMs, gFrameTimeMs, gFrameCount);
-    }
-
-    _glBindFramebuffer(GL_FRAMEBUFFER, savedFBO);
-    _glUseProgram(savedProgram);
-    _glViewport(savedViewport[0], savedViewport[1], savedViewport[2], savedViewport[3]);
-    _glBindBuffer(GL_ARRAY_BUFFER, savedArrayBuffer);
-    _glBindTexture(GL_TEXTURE_2D, savedTexture2D);
-    _glActiveTexture(savedActiveTexture);
-    if (savedScissorTest) _glEnable(GL_SCISSOR_TEST); else _glDisable(GL_SCISSOR_TEST);
-    if (savedBlend) _glEnable(GL_BLEND); else _glDisable(GL_BLEND);
-    if (savedDepthTest) _glEnable(GL_DEPTH_TEST); else _glDisable(GL_DEPTH_TEST);
-    if (savedStencilTest) _glEnable(GL_STENCIL_TEST); else _glDisable(GL_STENCIL_TEST);
-    _glColorMask(savedColorWriteMask[0], savedColorWriteMask[1], savedColorWriteMask[2], savedColorWriteMask[3]);
-
-    // Restore vertex attrib enable states
-    if (savedAttribEnable) {
-        for (int i = 0; i < maxAttribs; i++) {
-            if (savedAttribEnable[i]) _glEnableVertexAttribArray(i);
-            else _glDisableVertexAttribArray(i);
-        }
-        delete[] savedAttribEnable;
+        DOV_LOG("timing: %.2f ms (%.0f fps)", gFrameTimeMs, 1000.0f / gFrameTimeMs);
     }
 }
 
-void CleanupDepthOverlay() {
-    DBG_LOG("Depth overlay: CleanupDepthOverlay, FBO=(%d,%d), Tex=(%d,%d), Progs=(%d,%d,%d)",
-            gOverlayFBO, gDepthBlitFBO, gOverlayColorTex, gDepthBlitColorTex,
-            gSideBySideProgram, gDepthToColorProgram, gDepthTestVisProgram);
-    if (gOverlayFBO) { _glDeleteFramebuffers(1, &gOverlayFBO); gOverlayFBO = 0; }
-    if (gOverlayColorTex) { _glDeleteTextures(1, &gOverlayColorTex); gOverlayColorTex = 0; }
-    if (gDepthBlitFBO) { _glDeleteFramebuffers(1, &gDepthBlitFBO); gDepthBlitFBO = 0; }
-    if (gDepthBlitColorTex) { _glDeleteTextures(1, &gDepthBlitColorTex); gDepthBlitColorTex = 0; }
-    if (gSideBySideProgram) { _glDeleteProgram(gSideBySideProgram); gSideBySideProgram = 0; }
-    if (gDepthToColorProgram) { _glDeleteProgram(gDepthToColorProgram); gDepthToColorProgram = 0; }
-    if (gDepthTestVisProgram) { _glDeleteProgram(gDepthTestVisProgram); gDepthTestVisProgram = 0; }
-    CleanupTempDepthResources();
-    gOverlayInitDone = GL_FALSE;
-    gOverlayWidth = 0;
-    gOverlayHeight = 0;
-    gStableFrameCount = 0;
-    DBG_LOG("Depth overlay: cleanup done");
-}
+// ====================================================================
+// Update — called from eglSwapBuffers hook
+// ====================================================================
 
 void UpdateDepthOverlay(int width, int height) {
     std::lock_guard<std::mutex> lock(gOverlayMutex);
-    
-    bool fileTriggered = isDepthOverlayTriggered();
-    
-    if (fileTriggered && !gDepthOverlayEnabled) {
+
+    // TODO: restore file trigger for production
+    // bool triggered = (access(DEPTH_OVERLAY_TRIGGER_FILE, F_OK) == 0);
+    bool triggered = true;
+
+    if (triggered && !gDepthOverlayEnabled) {
         gDepthOverlayEnabled = true;
-        DBG_LOG("Depth overlay: ENABLED by trigger file, width=%d, height=%d", width, height);
-        InitDepthOverlay(width, height);
-    } else if (!fileTriggered && gDepthOverlayEnabled) {
+        DOV_LOG("ENABLED");
+    } else if (!triggered && gDepthOverlayEnabled) {
         gDepthOverlayEnabled = false;
-        DBG_LOG("Depth overlay: DISABLED, trigger file removed");
+        DOV_LOG("DISABLED");
     }
-    
-    if (gDepthOverlayEnabled) {
-        if (width == gLastStableWidth && height == gLastStableHeight) {
-            gStableFrameCount++;
-        } else {
-            if (gLastStableWidth != 0 || gLastStableHeight != 0) {
-                DBG_LOG("Depth overlay: resolution changed %dx%d -> %dx%d, reset stable count", 
-                        gLastStableWidth, gLastStableHeight, width, height);
-            }
-            gStableFrameCount = 0;
-            gLastStableWidth = width;
-            gLastStableHeight = height;
-        }
-        
-        if (gStableFrameCount >= DEPTH_OVERLAY_STABLE_FRAME_THRESHOLD) {
-            if (!gOverlayInitDone || gOverlayWidth != width || gOverlayHeight != height) {
-                InitDepthOverlay(width, height);
-            }
-            RenderDepthOverlay(width, height);
-        } else {
-            if (gFrameCount % 60 == 0) {
-                DBG_LOG("Depth overlay: waiting for stable frames %d/%d", 
-                        gStableFrameCount, DEPTH_OVERLAY_STABLE_FRAME_THRESHOLD);
-            }
-        }
+
+    if (!gDepthOverlayEnabled) return;
+
+    if (width == gLastStableWidth && height == gLastStableHeight) {
+        gStableFrameCount++;
+    } else {
+        gStableFrameCount = 0;
+        gLastStableWidth = width;
+        gLastStableHeight = height;
+    }
+
+    if (gStableFrameCount >= DEPTH_OVERLAY_STABLE_FRAME_THRESHOLD) {
+        if (!gOverlayInitDone || gOverlayWidth != width || gOverlayHeight != height)
+            InitDepthOverlay(width, height);
+        RenderDepthOverlay(width, height);
     }
 }
