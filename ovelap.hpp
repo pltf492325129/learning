@@ -16,15 +16,19 @@
     __android_log_print(ANDROID_LOG_DEBUG, "DepthOverlay", fmt, ##__VA_ARGS__)
 #endif
 
+// Enabled state
 extern bool gDepthOverlayEnabled;
 extern std::atomic<bool> gOverlayTogglePending;
 extern std::mutex gOverlayMutex;
-extern GLuint gLastDepthBlitTargetFBO;
+
+// Frame ID — set by hook.cpp or tcp_egltrace_auto.cpp before each overlay render
+extern int gOverlayFrameId;
+
+// Overlay resources
 extern GLuint gOverlayFBO;
 extern GLuint gOverlayColorTex;
 extern GLuint gDepthBlitFBO;
 extern GLuint gDepthBlitColorTex;
-extern GLuint gSideBySideProgram;
 extern GLuint gDepthToColorProgram;
 extern GLboolean gOverlayInitDone;
 extern int gOverlayWidth;
@@ -35,6 +39,9 @@ extern GLuint gCapturedDepthFBO;
 extern int gCapturedDepthWidth;
 extern int gCapturedDepthHeight;
 extern bool gDepthCapturedThisFrame;
+
+// FBO tracking (set by glBindFramebuffer hook)
+extern GLuint gLastDepthBlitTargetFBO;
 
 void InitDepthOverlay(int width, int height);
 void UpdateDepthOverlay(int width, int height);
