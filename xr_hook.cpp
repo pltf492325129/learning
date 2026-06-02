@@ -423,10 +423,18 @@ filter);
     // === Depth capture: copy while tile data still exists in GPU memory ===
     // After the game's depth blit, the GPU has resolved the source FBO's tile buffer.
     // Depth data is now in both source and destination textures. Blit to our capture FBO.
-    if ((mask & GL_DEPTH_BUFFER_BIT) && depthSrcFBO != 0 && !gDepthCapturedThisFrame) {
+    // NOTE: we intentionally do NOT check gDepthCapturedThisFrame here, because old
+    // capture code in tcp_egltrace_auto.cpp may have already set it (with empty data).
+    // Our capture overwrites whatever the old code did.
+    if ((mask & GL_DEPTH_BUFFER_BIT) && depthSrcFBO != 0) {
         int w = srcX1 - srcX0;
         int h = srcY1 - srcY0;
         if (w > 0 && h > 0) {
+            bool wasCaptured = gDepthCapturedThisFrame;
+            if (wasCaptured) {
+                DBG_LOG("[DOV][F%d]Depth capture: OVERRIDE (old code set captured=1, re-capturing)",
+                        g_frame_id);
+            }
             // Query source depth texture format for diagnostics
             GLint srcDepthBits = 0, srcStencilBits = 0;
             _glBindFramebuffer(GL_FRAMEBUFFER, depthSrcFBO);
