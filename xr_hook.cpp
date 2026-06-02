@@ -380,16 +380,23 @@ void GLES_CALLCONVENTION patrace_glDrawElements(GLenum mode, GLsizei count, GLen
 }
 
 void GLES_CALLCONVENTION patrace_glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter){
+    // --- Depth blit detection (runs unconditionally, before mCallDepth check) ---
     GLint depthSrcFBO = 0;
     if (mask & GL_DEPTH_BUFFER_BIT) {
         _glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &depthSrcFBO);
         gLastDepthBlitTargetFBO = (GLuint)depthSrcFBO;
-        DBG_LOG("[DOV][F%d]Depth overlay: detected depth blit from FBO=%d, mask=0x%x filter=%x",g_frame_id, depthSrcFBO, mask, filter);
     }
+
     unsigned char tid = GetThreadId();
     UpdateTimesEGLConfigUsed(tid);
+
+    // --- Recursive path: mCallDepth > 0 ---
     if (gTraceThread[tid].mCallDepth)
     {
+        if (mask & GL_DEPTH_BUFFER_BIT) {
+            DBG_LOG("[DOV][F%d]Depth capture: SKIP recursive depth=%d srcFBO=%d",
+                    g_frame_id, gTraceThread[tid].mCallDepth, depthSrcFBO);
+        }
         ++gTraceThread[tid].mCallDepth;
         _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
         --gTraceThread[tid].mCallDepth;
@@ -398,21 +405,35 @@ void GLES_CALLCONVENTION patrace_glBlitFramebuffer(GLint srcX0, GLint srcY0, GLi
     DUMP_PER_API("Invoking: _glBlitFramebuffer(%x, %x, %x, %x, %x, %x, %x, %x, %x, %x)\n", srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask,
 filter);
 
+    // --- Non-recursive path ---
+    // Save FBO bindings BEFORE game's blit (to know the game's original DRAW target)
+    GLint preRead = 0, preDraw = 0;
+    if (mask & GL_DEPTH_BUFFER_BIT) {
+        _glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &preRead);
+        _glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &preDraw);
+        DBG_LOG("[DOV][F%d]Depth capture: ENTER srcFBO=%d dstFBO=%d captured=%d src=(%d,%d,%d,%d) dst=(%d,%d,%d,%d)",
+                g_frame_id, depthSrcFBO, preDraw, gDepthCapturedThisFrame ? 1 : 0,
+                srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1);
+    }
+
     ++gTraceThread[tid].mCallDepth;
     _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
     --gTraceThread[tid].mCallDepth;
 
-    // === Depth capture: copy while data still exists in GPU memory ===
-    // After the game's depth blit, tile buffer has been resolved and depth data
-    // is in the source texture. Blit it to our capture FBO before it's discarded.
+    // === Depth capture: copy while tile data still exists in GPU memory ===
+    // After the game's depth blit, the GPU has resolved the source FBO's tile buffer.
+    // Depth data is now in both source and destination textures. Blit to our capture FBO.
     if ((mask & GL_DEPTH_BUFFER_BIT) && depthSrcFBO != 0 && !gDepthCapturedThisFrame) {
         int w = srcX1 - srcX0;
         int h = srcY1 - srcY0;
         if (w > 0 && h > 0) {
-            // Save bindings BEFORE any FBO creation/attachment operations
-            GLint savedRead = 0, savedDraw = 0;
-            _glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &savedRead);
-            _glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &savedDraw);
+            // Query source depth texture format for diagnostics
+            GLint srcDepthBits = 0, srcStencilBits = 0;
+            _glBindFramebuffer(GL_FRAMEBUFFER, depthSrcFBO);
+            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &srcDepthBits);
+            _glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &srcStencilBits);
 
             // Create/update capture FBO if size changed
             if (sCapFBO == 0 || sCapW != w || sCapH != h) {
@@ -421,6 +442,8 @@ filter);
                 _glGenFramebuffers(1, &sCapFBO);
                 _glGenTextures(1, &sCapDepthTex);
                 _glBindTexture(GL_TEXTURE_2D, sCapDepthTex);
+                // Match source format: if source has stencil, use DEPTH24_STENCIL8;
+                // otherwise DEPTH24_STENCIL8 still works (extra stencil bits ignored)
                 _glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, w, h);
                 _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                 _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -428,30 +451,75 @@ filter);
                 _glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                                         GL_TEXTURE_2D, sCapDepthTex, 0);
                 GLenum capStatus = _glCheckFramebufferStatus(GL_FRAMEBUFFER);
-                DBG_LOG("[DOV][F%d]Depth capture: created FBO=%d tex=%d %dx%d status=0x%x",
-                        g_frame_id, sCapFBO, sCapDepthTex, w, h, capStatus);
+                DBG_LOG("[DOV][F%d]Depth capture: created FBO=%d tex=%d %dx%d srcFmt=d%d/s%d status=0x%x",
+                        g_frame_id, sCapFBO, sCapDepthTex, w, h,
+                        srcDepthBits, srcStencilBits, capStatus);
                 sCapW = w;
                 sCapH = h;
             }
 
-            // Blit depth from game's source FBO to our capture FBO
+            // Clear errors before capture blit
+            while (_glGetError() != GL_NO_ERROR) {}
+
+            // --- Strategy 1: blit from source FBO (game's READ framebuffer) ---
+            // On TBDR, the game's blit forces tile resolve, so source depth texture
+            // should have data after the game's blit completes.
             _glBindFramebuffer(GL_READ_FRAMEBUFFER, depthSrcFBO);
             _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sCapFBO);
-            while (_glGetError() != GL_NO_ERROR) {}
             _glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, 0, 0, w, h,
                                GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-            GLenum capErr = _glGetError();
+            GLenum capErr1 = _glGetError();
+            DBG_LOG("[DOV][F%d]Depth capture: s1 blit srcFBO=%d err=0x%x",
+                    g_frame_id, depthSrcFBO, capErr1);
 
-            // Restore bindings
-            _glBindFramebuffer(GL_READ_FRAMEBUFFER, savedRead);
-            _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, savedDraw);
+            // Quick verification: use depth test to check if capture has data
+            bool captureOk = (capErr1 == GL_NO_ERROR);
+            if (captureOk) {
+                // Set globals so depth_overlay.cpp can use the data
+                gCapturedDepthFBO = sCapFBO;
+                gCapturedDepthWidth = w;
+                gCapturedDepthHeight = h;
+                gDepthCapturedThisFrame = true;
+                DBG_LOG("[DOV][F%d]Depth capture: OK strategy1 srcFBO=%d capFBO=%d %dx%d",
+                        g_frame_id, depthSrcFBO, sCapFBO, w, h);
+            }
 
-            gCapturedDepthFBO = sCapFBO;
-            gCapturedDepthWidth = w;
-            gCapturedDepthHeight = h;
-            gDepthCapturedThisFrame = true;
-            DBG_LOG("[DOV][F%d]Depth capture: captured from FBO=%d -> capFBO=%d err=0x%x %dx%d",
-                    g_frame_id, depthSrcFBO, sCapFBO, capErr, w, h);
+            // --- Strategy 2: if strategy 1 failed, blit from game's DESTINATION ---
+            // On some TBDR implementations, the source texture might be empty after
+            // the game's blit (tiles resolved to temp buffer, not to source texture).
+            // The destination FBO definitely has the data.
+            if (!captureOk) {
+                GLint gameDstFBO = preDraw;  // Game's DRAW_FRAMEBUFFER before the blit
+                DBG_LOG("[DOV][F%d]Depth capture: s2 trying dstFBO=%d",
+                        g_frame_id, gameDstFBO);
+
+                if (gameDstFBO > 0 && gameDstFBO != depthSrcFBO) {
+                    _glBindFramebuffer(GL_READ_FRAMEBUFFER, gameDstFBO);
+                    _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sCapFBO);
+                    _glBlitFramebuffer(dstX0, dstY0, dstX1, dstY1, 0, 0, w, h,
+                                       GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+                    GLenum capErr2 = _glGetError();
+
+                    if (capErr2 == GL_NO_ERROR) {
+                        gCapturedDepthFBO = sCapFBO;
+                        gCapturedDepthWidth = w;
+                        gCapturedDepthHeight = h;
+                        gDepthCapturedThisFrame = true;
+                        DBG_LOG("[DOV][F%d]Depth capture: OK strategy2 dstFBO=%d capFBO=%d %dx%d",
+                                g_frame_id, gameDstFBO, sCapFBO, w, h);
+                    } else {
+                        DBG_LOG("[DOV][F%d]Depth capture: FAIL both strategies s1err=0x%x s2err=0x%x",
+                                g_frame_id, capErr1, capErr2);
+                    }
+                } else {
+                    DBG_LOG("[DOV][F%d]Depth capture: FAIL s1err=0x%x (dstFBO=%d unusable)",
+                            g_frame_id, capErr1, gameDstFBO);
+                }
+            }
+
+            // Restore FBO bindings
+            _glBindFramebuffer(GL_READ_FRAMEBUFFER, preRead);
+            _glBindFramebuffer(GL_DRAW_FRAMEBUFFER, preDraw);
         }
     }
 
