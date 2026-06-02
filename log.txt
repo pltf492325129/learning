@@ -1,14 +1,27 @@
-	行 25066: 05-30 16:29:21.778 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,559: [DEBUG] DIAG capture: depth test on capFBO R=255 G=0 B=0 (RED=empty)
-	行 25067: 05-30 16:29:21.778 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,564: [DEBUG] DIAG capture: CONCLUSION=CAPTURED_BUT_EMPTY (capture failed?)
-	行 25238: 05-30 16:29:21.844 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG capture: depth was captured this frame, capFBO=18 1918x828
-	行 25239: 05-30 16:29:21.846 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,559: [DEBUG] DIAG capture: depth test on capFBO R=255 G=0 B=0 (RED=empty)
-	行 25240: 05-30 16:29:21.846 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,564: [DEBUG] DIAG capture: CONCLUSION=CAPTURED_BUT_EMPTY (capture failed?)
-	行 25410: 05-30 16:29:21.917 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG capture: depth was captured this frame, capFBO=18 1918x828
-	行 25411: 05-30 16:29:21.919 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,559: [DEBUG] DIAG capture: depth test on capFBO R=255 G=0 B=0 (RED=empty)
-	行 25412: 05-30 16:29:21.919 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,564: [DEBUG] DIAG capture: CONCLUSION=CAPTURED_BUT_EMPTY (capture failed?)
-	行 25588: 05-30 16:29:21.986 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG capture: depth was captured this frame, capFBO=18 1918x828
-	行 25589: 05-30 16:29:21.988 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,559: [DEBUG] DIAG capture: depth test on capFBO R=255 G=0 B=0 (RED=empty)
-	行 25590: 05-30 16:29:21.988 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,564: [DEBUG] DIAG capture: CONCLUSION=CAPTURED_BUT_EMPTY (capture failed?)
-	行 25767: 05-30 16:29:22.055 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,508: [DEBUG] DIAG capture: depth was captured this frame, capFBO=18 1918x828
-	行 25769: 05-30 16:29:22.057 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,559: [DEBUG] DIAG capture: depth test on capFBO R=255 G=0 B=0 (RED=empty)
-	行 25770: 05-30 16:29:22.057 41150 41981 I A00368/com.miHoYo.Yuanshen/gltrace: depth_overlay.cpp,564: [DEBUG] DIAG capture: CONCLUSION=CAPTURED_BUT_EMPTY (capture failed?)
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=77 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=33 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,29010: [DEBUG] [DOV][F1002]Depth capture: ENTER srcFBO=77 dstFBO=33 captured=1 src=(0,0,1918,828) dst=(0,0,1918,828)
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=77 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=78 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=96 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=45 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=6 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1002]Depth overlay: FBO=1 has depth attachment type=0x8d41
+tcp_egltrace_auto.cpp,41345: [DEBUG] [DOV][F1002]Depth overlay: selected best depth FBO=77 (draws=153, verts=494457)
+depth_overlay.cpp,353: [DEBUG] [DOV][F1002] depth capTex=230 1918x828
+depth_overlay.cpp,404: [DEBUG] [DOV][F1002] PlanA=0, try PlanB
+depth_overlay.cpp,463: [DEBUG] [DOV][F1002] PlanB=0 (depth empty?)
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=31 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=33 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,29010: [DEBUG] [DOV][F1003]Depth capture: ENTER srcFBO=31 dstFBO=33 captured=1 src=(0,0,1918,828) dst=(0,0,1918,828)
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=31 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=78 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=96 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=45 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=6 has depth attachment type=0x1702
+tcp_egltrace_auto.cpp,1545: [DEBUG] [DOV][F1003]Depth overlay: FBO=1 has depth attachment type=0x8d41
+tcp_egltrace_auto.cpp,41345: [DEBUG] [DOV][F1003]Depth overlay: selected best depth FBO=31 (draws=153, verts=494457)
+depth_overlay.cpp,353: [DEBUG] [DOV][F1003] depth capTex=230 1918x828
+depth_overlay.cpp,404: [DEBUG] [DOV][F1003] PlanA=0, try PlanB
+depth_overlay.cpp,463: [DEBUG] [DOV][F1003] PlanB=0 (depth empty?)
+
